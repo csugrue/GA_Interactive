@@ -1,0 +1,1 @@
+/Users/chris/Documents/openFrameworks/of_preRelease_v0061_osxSL_FAT/apps/graffitiAnalysis_model/GA_3D_v0.0/src/ofxSTLModel.cpp:14: error: no 'void ofxSTLModel::clear()' member function declared in class 'ofxSTLModel'
