@@ -2,15 +2,21 @@
 
 particleSystem::particleSystem()
 {
-    memset(pos, 0, sizeof(float)*MAX_PARTICLES*3);
-    memset(ori, 0, sizeof(float)*MAX_PARTICLES*3);
-    memset(col, 0, sizeof(float)*MAX_PARTICLES*4);
-    memset(bOn, 0, sizeof(bool)*MAX_PARTICLES);
-    memset(lines,0, sizeof(float)*MAX_PARTICLES*3*2);
-
     dropOffRate = 0.18f;
     force       = 1;
     psize       = 3.0;
+	
+	memset(pos, 0, sizeof(float)*MAX_PARTICLES*3);
+    memset(ori, 0, sizeof(float)*MAX_PARTICLES*3);
+    memset(col, 0, sizeof(float)*MAX_PARTICLES*4);
+    memset(bOn, 0, sizeof(bool)*MAX_PARTICLES);
+	memset(sizes,psize, sizeof(float)*MAX_PARTICLES);
+	memset(framesOn,0, sizeof(int)*MAX_PARTICLES);
+	memset(stopPos,0, sizeof(float)*MAX_PARTICLES*3);
+	memset(stopVec,0, sizeof(float)*MAX_PARTICLES*3);
+
+
+    
 
 }
 
@@ -59,10 +65,17 @@ void particleSystem::reset(int fw, int fh)
                 col[p][3] = 0;
 
                 bOn[p] = false;
+				
+				sizes[p] = psize;
+				framesOn[p] = 0;
             }
 
 		}
 	}
+	
+	memset(stopPos,0, sizeof(float)*MAX_PARTICLES*3);
+	memset(stopVec,0, sizeof(float)*MAX_PARTICLES*3);
+
 }
 
 
@@ -77,43 +90,72 @@ void particleSystem::setup(int fieldsize, int fw, int fh, float screenW, float s
 
 	reset(fw,fh);
 
+	cout << " total particles: " << numParticles << " max " << MAX_PARTICLES << endl;
 
 }
 
-void particleSystem::update(float dt, float screenW, float screenH, float time, float alpha, bool bReset )
+void particleSystem::update(float dt,float time, float alpha, bool bReset )
 {
-    int     fieldPosX,fieldPosY,posp;
+	float screenW = w;
+	float screenH = h;
+	 
+	int     fieldPosX,fieldPosY,posp;
     ofPoint addV;
     float   addVX,addVY;
 
     float damp      = dropOffRate*dt;
     float myalpha   = .75*alpha;
 
-    int totalOn = 0;
-    for (int i = 0; i < numParticles; i++)
+    //int totalOn = 0;
+    
+	// turn on particles that have been moved
+	for (int i = 0; i < numParticles; i++)
 	{
-        if( bOn[i] ){totalOn++; continue;}
-        else if( pos[i][0] != ori[i][0] && pos[i][1] != ori[i][1] )
+       
+        //-- note: changes to make suio amp part
+		if( bOn[i] ){
+			framesOn[i]++;
+			if( framesOn[i] > 60 && vel[i][0] < .000001 && vel[i][1] < .000001)
+			{
+				vel[i][0] = 0;
+				vel[i][1] = 0;
+				stopPos[i][0] = pos[i][0]; stopPos[i][1] = pos[i][1]; stopPos[i][2] = pos[i][2];
+				ofxVec3f p1 = ofxVec3f(pos[i][0],pos[i][1],pos[i][2])-ofxVec3f(ori[i][0],ori[i][1],pos[i][2]);
+				p1 = p1.normalize();
+				stopVec[i][0] = p1.x; stopVec[i][1] = p1.y; stopVec[i][2] = p1.z;
+				bOn[i] = false;
+			}
+		}
+		//---
+		
+		if( framesOn[i] == 0 && pos[i][0] != ori[i][0] && pos[i][1] != ori[i][1] )
         {
             pos[i][2] = time;
             bOn[i]    = true;
+			framesOn[i] = 0;
         }
+		
+		
 	}
-
-
-    for (int i = 0; i < numParticles; i++)
+	
+    // add velocity vector to particles
+	for (int i = 0; i < numParticles; i++)
 	{
         pos[i][0] += vel[i][0]*dt;
         pos[i][1] += vel[i][1]*dt;
 	}
+	
 
+	
 	if(!bReset)
 	{
 
 	    for (int i = 0; i < numParticles; i++)
         {
 
-            fieldPosX = (int)((pos[i][0]/screenW) * (float)WIDTH_FIELD);
+            if( framesOn[i] > 0 && !bOn[i] ) continue;
+			
+			fieldPosX = (int)((pos[i][0]/screenW) * (float)WIDTH_FIELD);
             fieldPosY = (int)((pos[i][1]/screenH) * (float)HEIGHT_FIELD);
 
 
@@ -124,7 +166,6 @@ void particleSystem::update(float dt, float screenW, float screenH, float time, 
             else{
 
                 posp = fieldPosY * WIDTH_FIELD + fieldPosX;
-                //addV = VFptr->getVel(posp);
 
                 addVX = dt*(force*VFptr->fx[posp]);//addV.x);
                 addVY = dt*(force*VFptr->fy[posp]);
@@ -171,9 +212,17 @@ void particleSystem::draw(float time, float alpha, float size,  bool bDrawLines)
 
     for (int i = 0; i < numParticles; i++)
 	{
-        if(!bOn[i]){
+        if(framesOn[i] <= 0 ){
+		//!bOn[i]){
 			col[i][3] = 0;
-        }else{ 
+		}/*else if(!bOn[i])
+		{
+			col[i][0] = 1;
+			col[i][1] = 0;
+			col[i][2] = 0;
+			col[i][3] = alpha;
+		
+		}*/else{ 
 			col[i][0] = 1;
 			col[i][1] = 1;
 			col[i][2] = 1;
@@ -192,7 +241,7 @@ void particleSystem::draw(float time, float alpha, float size,  bool bDrawLines)
 
         for (int i = 0; i < numParticles; i++)
 		{
-		    if(!bOn[i]) continue;
+		    if(framesOn[i] <= 0) continue;
 
 		    linePoints[0][0] = pos[i][0];
             linePoints[0][1] = pos[i][1];
@@ -237,38 +286,40 @@ void particleSystem::draw(float time, float alpha, float size,  bool bDrawLines)
     glDisableClientState(GL_COLOR_ARRAY);*/
 
 	float rectPoints[12];
-	int w = size*2;
-	int h = size*2;
+	int w = 1;//size;
+	int h = 1;//size;
 	
     
 	glColor4f(1,1,1,alpha);
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
-	
+	//glEnableClientState(GL_COLOR_ARRAY);
+
 	for (int i = 0; i < numParticles; i++)
 	{
 		if(col[i][3] <= 0 ) continue;
 		
-		rectPoints[0] = pos[i][0]-w/2;
-		rectPoints[1] = pos[i][1]-h/2;
+		rectPoints[0] = pos[i][0]-(w*sizes[i])*.5;
+		rectPoints[1] = pos[i][1]-(w*sizes[i])*.5;
 		rectPoints[2] = pos[i][2];
 		
-		rectPoints[3] = pos[i][0]+w/2;
-		rectPoints[4] = pos[i][1]-h/2;
+		rectPoints[3] = pos[i][0]+(w*sizes[i])*.5;
+		rectPoints[4] = pos[i][1]-(w*sizes[i])*.5;
 		rectPoints[5] = pos[i][2];
 		
-		rectPoints[6] = pos[i][0]+w/2;
-		rectPoints[7] = pos[i][1]+h/2;
+		rectPoints[6] = pos[i][0]+(w*sizes[i])*.5;
+		rectPoints[7] = pos[i][1]+(w*sizes[i])*.5;
 		rectPoints[8] = pos[i][2];
 		
-		rectPoints[9] = pos[i][0]-w/2;
-		rectPoints[10] = pos[i][1]+h/2;
+		rectPoints[9] = pos[i][0]-(w*sizes[i])*.5;
+		rectPoints[10] = pos[i][1]+(w*sizes[i])*.5;
 		rectPoints[11] = pos[i][2];
 		
-		
+		//glColorPointer(4, GL_FLOAT, 0, col[i]);
 		glVertexPointer(3, GL_FLOAT, 0, &rectPoints[0]);
 		glDrawArrays( GL_TRIANGLE_FAN, 0, 4);
+		
 	}
 
-
+	//glDisableClientState(GL_COLOR_ARRAY);
 }

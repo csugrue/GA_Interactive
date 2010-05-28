@@ -3,24 +3,17 @@
 
 
 #include "ofMain.h"
-#include "ofxSTLModel.h"
-#include "ofxVectorMath.h"
-#include "ofxControlPanel.h"
-#include "grafTagMulti.h"
-#include "grafIO.h"
-#include "gmlModel.h"
-#include "grafCurveSmoother.h"
+#include "grafPlayerApp.h"
 
 /*
+Graffiti Analysis 2.0: Audio Interactive
+2010
 
-- loads in  gml file, and draws as skeleteon
-- add control panel for choosing file, loading gml, saving out model or loading in model
-- edit options for points, so move through each point and adjust "twisting" or remove points that are toow close
-- adjust scaling in z-depth
+Analyzes audio input and plays <gml> tags that respond to fft data.
 
-classes:
-: gmlModelSaver
 */
+
+#define NUM_BANDS 256
 
 class testApp : public ofBaseApp{
 
@@ -38,31 +31,18 @@ class testApp : public ofBaseApp{
 		void mouseReleased(int x, int y, int button);
 		void resized(int w, int h);
 		
-		void loadTag(string name);
 		
-		// model
-		void setModel();
+		GrafPlayerApp	grafAudioPlayerApp;
 		
 		// controls
-		void setupControls();
-		void updateControls();
+		//void setupControls();
+		//void updateControls();
 		
 		// control panel
-		ofxControlPanel	panel;
+		/*ofxControlPanel	panel;
 		guiTypeFileLister * gmlLister;
-		guiTypeFileLister * stlLister;
-		simpleFileLister lister_gml, lister_stl;
-		
-		
-		// graf
-		GmlModel		tag;
-		grafIO			grafIo;
-		ofxSTLModel		model;
-		string currentTagName;
-		grafCurveSmoother	gSmoother;
-		bool bUseSmoothing;
-		
-
+		simpleFileLister lister_gml;
+		int prevAudioInput;*/
 
 };
 

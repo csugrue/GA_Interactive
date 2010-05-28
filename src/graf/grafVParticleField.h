@@ -23,8 +23,11 @@ class grafVParticleField
 	
 		void draw( float zdepth, int screenW, int screenH );
 		
-	
-	
+		// for particle animations (from audio data)
+		void updateParticleSizes(float * vals, float averageVal, int tVals, float maxScale = 4.f);
+		void updateDampingFromAudio(float val);
+		void updateParticleAmpli(float * vals, float averageVal, int tVals, float maxScale = 4.f);
+		
 		float alpha;
 		float particle_damping;
 		float particle_size;
