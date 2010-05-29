@@ -13,7 +13,6 @@ Analyzes audio input and plays <gml> tags that respond to fft data.
 
 */
 
-#define NUM_BANDS 256
 
 class testApp : public ofBaseApp{
 
@@ -30,7 +29,7 @@ class testApp : public ofBaseApp{
 		void mousePressed(int x, int y, int button);
 		void mouseReleased(int x, int y, int button);
 		void resized(int w, int h);
-		
+		void audioReceived(float * input, int bufferSize, int nChannels);
 		
 		GrafPlayerApp	grafAudioPlayerApp;
 		

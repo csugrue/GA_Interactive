@@ -1,0 +1,63 @@
+<PLAY>
+    <val_0>1.000000</val_0>
+</PLAY>
+<ROTATE>
+    <val_0>1.000000</val_0>
+</ROTATE>
+<SHOW_NAME>
+    <val_0>1.000000</val_0>
+</SHOW_NAME>
+<SHOW_TIME>
+    <val_0>0.000000</val_0>
+</SHOW_TIME>
+<FULL_SCREEN>
+    <val_0>0.000000</val_0>
+</FULL_SCREEN>
+<LINE_ALPHA>
+    <val_0>0.944444</val_0>
+</LINE_ALPHA>
+<LINE_WIDTH>
+    <val_0>2.000000</val_0>
+</LINE_WIDTH>
+<P_SIZE>
+    <val_0>2.000000</val_0>
+</P_SIZE>
+<P_ALPHA>
+    <val_0>0.750000</val_0>
+</P_ALPHA>
+<P_DAMP>
+    <val_0>0.150000</val_0>
+</P_DAMP>
+<P_NUM>
+    <val_0>1.000000</val_0>
+</P_NUM>
+<FOG_START>
+    <val_0>333.333252</val_0>
+</FOG_START>
+<FOG_END>
+    <val_0>2000.000000</val_0>
+</FOG_END>
+<USE_FOG>
+    <val_0>0.000000</val_0>
+</USE_FOG>
+<LINE_SCALE>
+    <val_0>0.050000</val_0>
+</LINE_SCALE>
+<USE_GRAVITY>
+    <val_0>1.000000</val_0>
+</USE_GRAVITY>
+<USE_MASK>
+    <val_0>0.000000</val_0>
+</USE_MASK>
+<audio_input>
+    <val_0>1.000000</val_0>
+</audio_input>
+<open_sound_file>
+    <val_0>0.000000</val_0>
+</open_sound_file>
+<outward_amp_force>
+    <val_0>5.555556</val_0>
+</outward_amp_force>
+<particle_size_force>
+    <val_0>22.000000</val_0>
+</particle_size_force>

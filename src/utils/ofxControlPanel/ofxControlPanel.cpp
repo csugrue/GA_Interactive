@@ -35,8 +35,8 @@ void ofxControlPanel::setup(string controlPanelName, float panelX, float panelY,
       setDimensions(width, height);
       setShowText(true);
 	
-	  if(bUseMyFont)
-		  loadFont("fonts/verdana.ttf", 8);
+	 // if(bUseMyFont)
+	//	  loadFont("fonts/verdana.ttf", 8);
 	
 }
 

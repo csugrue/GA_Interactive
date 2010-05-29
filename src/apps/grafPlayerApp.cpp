@@ -31,7 +31,7 @@ void GrafPlayerApp::setup(){
 	screenH			= 768;
 	lastX			= 0;
 	lastY			= 0;
-	bShowPanel		= false;
+	bShowPanel		= true;
 	bRotating		= false;
 	bShowName		= false;
 	bShowTime		= false;
@@ -49,9 +49,9 @@ void GrafPlayerApp::setup(){
 	tagPosVel.set(0,0,0);
 	myTagDirectory = TAG_DIRECTORY;
 	
-	fontSS.loadFont("fonts/frabk.ttf",9);
-	fontS.loadFont("fonts/frabk.ttf",14);
-	fontL.loadFont("fonts/frabk.ttf",22);
+	//fontSS.loadFont("fonts/frabk.ttf",9);
+	//fontS.loadFont("fonts/frabk.ttf",14);
+	//fontL.loadFont("fonts/frabk.ttf",22);
 	imageMask.loadImage("images/mask.jpg");
 	
 	float FogCol[3]={0,0,0};
@@ -73,6 +73,9 @@ void GrafPlayerApp::setup(){
 	
 	
 	audio.setup();
+	
+	// temp
+	panel.setSelectedPanel("Audio Settings");
 
 }
 
@@ -140,10 +143,18 @@ void GrafPlayerApp::update(){
 		
 		particleDrawer.update( myTagPlayer.getCurrentPoint(),myTagPlayer.getVelocityForTime(&tags[currentTagID]),  dt,  myTagPlayer.bReset);
 		
-		// audio applied
-		particleDrawer.updateParticleSizes(audio.normalizedValues,audio.averageVal, NUM_BANDS,20);
+		
+		//---------- AUDIO applied
+		if(panel.getValueB("use_p_size") ) 
+			particleDrawer.updateParticleSizes(audio.ifftOutput,audio.averageVal, NUM_BANDS,panel.getValueF("particle_size_force") );
+		
 		//particleDrawer.updateDampingFromAudio(audio.averageVal+.5);
-		if(!bTrans) particleDrawer.updateParticleAmpli(audio.normalizedValues,audio.averageVal, NUM_BANDS,10);
+		
+		if(!bTrans && panel.getValueB("use_p_amp") ) 
+			particleDrawer.updateParticleAmpli(audio.ifftOutput,audio.averageVal, NUM_BANDS,panel.getValueF("outward_amp_force") );
+		//---------
+		
+		
 		
 		myTagPlayer.bReset = false; // important so no particle error on first stroke
 		prevStroke		= myTagPlayer.getCurrentStroke();
@@ -254,14 +265,14 @@ void GrafPlayerApp::draw(){
 	if( mode == PLAY_MODE_PLAY )
 	{
 		ofSetColor(255,255,255,255);
-		if( bShowName && tags.size() > 0 ) fontS.drawString( tags[ currentTagID ].tagname, 10,ofGetHeight()-30 );
+		//if( bShowName && tags.size() > 0 ) fontS.drawString( tags[ currentTagID ].tagname, 10,ofGetHeight()-30 );
 		if( bShowTime && tags.size() > 0 )
 		{
 			float time = myTagPlayer.getCurrentTime();
-			float wd = fontL.stringWidth( ofToString( time,0) ) / 10.f;
-			wd = 10*(int)(wd);
+			//float wd = fontL.stringWidth( ofToString( time,0) ) / 10.f;
+			//wd = 10*(int)(wd);
 			
-			fontL.drawString(ofToString(time,2), ofGetWidth()-wd-70, ofGetHeight()-30);
+			//fontL.drawString(ofToString(time,2), ofGetWidth()-wd-70, ofGetHeight()-30);
 		}
 	
 	}
@@ -271,8 +282,8 @@ void GrafPlayerApp::draw(){
 	
 	if(bShowPanel){
 		panel.draw();
-		fontSS.drawString("x: toggle control panel  |  p: pause/play  |  s: screen capture  |  m: toggle mouse  |  f: toggle fullscreen  |  h: toggle home  |  arrows: next/prev  |  esc: quit", 90, ofGetHeight()-50);
-		fontSS.drawString("left mouse: alter position  |  left+shift mouse: zoom  |  right mouse: rotate y  |  right+shift mouse: rotate x", 220, ofGetHeight()-30);
+		//fontSS.drawString("x: toggle control panel  |  p: pause/play  |  s: screen capture  |  m: toggle mouse  |  f: toggle fullscreen  |  h: toggle home  |  arrows: next/prev  |  esc: quit", 90, ofGetHeight()-50);
+		//fontSS.drawString("left mouse: alter position  |  left+shift mouse: zoom  |  right mouse: rotate y  |  right+shift mouse: rotate x", 220, ofGetHeight()-30);
 		
 		if( panel.getSelectedPanelName() == "Audio Settings" )
 		{
@@ -534,6 +545,12 @@ void GrafPlayerApp::setupContolPanel()
 	names_audio_options.push_back("music file");
 	panel.addMultiToggle("audio input:", "audio_input", 1, names_audio_options);
 	panel.addToggle("open sound file", "open_sound_file", false);
+	panel.addSlider("outward amp force","outward_amp_force",8,0,200,false);
+	panel.addSlider("particle size force","particle_size_force",22,0,200,false);
+	
+	// toggles to apply what to what...
+	panel.addToggle("use particle amp", "use_p_amp", true);
+	panel.addToggle("use particle size", "use_p_size", true);
 	
 	//--- load saved
 	panel.loadSettings("settings/appSettings.xml");
@@ -601,8 +618,8 @@ void GrafPlayerApp::updateConrolPanel()
 							string currentFilename = paths.back();
 							cout << "load: " << currentFilename << endl;
 							cout << "result ? " << result << endl;
-							audio.music.loadSound(result);
-							audio.music.play();
+							//audio.music.loadSound(result);
+							//audio.music.play();
 						}
 						
 					}

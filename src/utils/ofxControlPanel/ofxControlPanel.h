@@ -33,7 +33,7 @@ class ofxControlPanel: public guiBaseObject{
         ofxControlPanel();
         ~ofxControlPanel();
 
-        void setup(string controlPanelName, float panelX, float panelY, float width, float height, bool bUseMyFont= true);
+        void setup(string controlPanelName, float panelX, float panelY, float width, float height, bool bUseMyFont= false);
         void loadFont( string fontName, int fontsize );
 
         guiTypePanel * addPanel(string panelName, int numColumns, bool locked = false);

@@ -6,13 +6,12 @@ void testApp::setup(){
 	
 	ofSetFrameRate(60);
 	
-	ofSoundStreamSetup(0,2,this, 44100, NUM_BANDS, 4);	
-	
-	//setupControls();
-		
 	ofBackground(0,0,0);
 	
+	ofSoundStreamSetup(0,1,this, 44100, NUM_BANDS, 4);	
+
 	grafAudioPlayerApp.setup();
+	
 }
 
 
@@ -65,3 +64,12 @@ void testApp::mouseReleased(int x, int y, int button){
 
 }
 
+//--------------------------------------------------------------
+void testApp::audioReceived(float * input, int bufferSize, int nChannels){	
+	// samples are "interleaved"
+	if(grafAudioPlayerApp.audio.bSetup)
+	{
+	memcpy(grafAudioPlayerApp.audio.audioInput, input, sizeof(float) * (NUM_BANDS));
+		grafAudioPlayerApp.audio.bufferCounter++;
+	}
+}

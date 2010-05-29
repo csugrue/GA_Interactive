@@ -1,8 +1,10 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxFft.h"
+#include "aubioAnalyzer.h"
 
-#define NUM_BANDS 256
+#define NUM_BANDS 512
 
 
 class AudioAnalyzer{
@@ -16,22 +18,30 @@ class AudioAnalyzer{
 		void update();
 		void draw();
 	
-		void audioReceived(ofAudioEventArgs& event); 
-
-		// input audio data
-		float * left;
-		float * right;
+		void plot(float* array, int length, float scale, float offset);
+		
 		int 	bufferCounter;
 		int 	drawCounter;
 	
 		// fft
-		float 				* fftSmoothed;
-		float normalizedValues[NUM_BANDS];
+		//float normalizedValues[NUM_BANDS];
+		//float normInputValues[NUM_BANDS];
 		float averageVal;
 		float maxVal;
-	
-		// audio from music file
-		ofSoundPlayer music;
+		
+		ofxFft	* fft;
+		float	* eqFunction;
+		float	* eqOutput;
+		float	* ifftOutput;
+		float	* fftOutput;
+		float	* audioInput;
+		
+		int bufferSize;
+		
+		bool bSetup;
+		
+		// aubio stuff
+		aubioAnalyzer	aubio;
 
 };
 

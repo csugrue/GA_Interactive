@@ -85,9 +85,9 @@ class GrafPlayerApp{
 		float				rotationY;				// y rotation for current tag
 		ofPoint				tagPosVel;				// vel for moving tag around on screen
 		float				tagMoveForce;			// force for moving tag around
-		ofTrueTypeFont		fontS;					// fonts for drawing info to screen
-		ofTrueTypeFont		fontL;
-		ofTrueTypeFont		fontSS;
+		//ofTrueTypeFont		fontS;					// fonts for drawing info to screen
+		//ofTrueTypeFont		fontL;
+		//ofTrueTypeFont		fontSS;
 		int					prevStroke;				// for multi stroke tags, to help particle animation
 		float				fogStart,fogEnd;		// fog settings
 		float				dt;

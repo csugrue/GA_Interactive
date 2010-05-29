@@ -115,7 +115,7 @@ void particleSystem::update(float dt,float time, float alpha, bool bReset )
         //-- note: changes to make suio amp part
 		if( bOn[i] ){
 			framesOn[i]++;
-			if( framesOn[i] > 60 && vel[i][0] < .000001 && vel[i][1] < .000001)
+			if( framesOn[i] > 30 && vel[i][0] < .000001 && vel[i][1] < .000001)
 			{
 				vel[i][0] = 0;
 				vel[i][1] = 0;
@@ -290,6 +290,8 @@ void particleSystem::draw(float time, float alpha, float size,  bool bDrawLines)
 	int h = 1;//size;
 	
     
+	//glEnable(GL_DEPTH_TEST);
+	
 	glColor4f(1,1,1,alpha);
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -321,5 +323,6 @@ void particleSystem::draw(float time, float alpha, float size,  bool bDrawLines)
 		
 	}
 
-	//glDisableClientState(GL_COLOR_ARRAY);
+	//glDisable(GL_DEPTH_TEST);
+	glDisableClientState(GL_VERTEX_ARRAY);
 }

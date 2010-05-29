@@ -133,6 +133,7 @@ void grafVParticleField::updateParticleSizes(float * vals, float averageVal, int
 	{
 		int ps = i % tVals;
 		float force = PS.psize * (averageVal * maxScale +  vals[ps] * (maxScale*.5) + 1);
+		if(force!=force) force = 0;
 		PS.sizes[i] = .9*PS.sizes[i]+.1*force;//1 + maxScale * vals[ps];
 		
 	}
@@ -154,8 +155,11 @@ void grafVParticleField::updateParticleAmpli(float * vals, float averageVal, int
 	for( int i = 0; i < PS.numParticles; i++)
 	{
 		int ps = i % tVals;
-		float pct = 1.5*powf((ps/(float)tVals),1.5);//.5+((ps/(float)tVals));
-		float force = averageVal * maxScale +  ((vals[ps]*vals[ps])*pct) * (maxScale*.5);//maxScale*(vals[ps]);//(averageVal * 10 +  vals[ps] * 5 + .5);
+		float pct = 1;//1.5*powf((ps/(float)tVals),1.5);//.5+((ps/(float)tVals));
+		float force = (vals[ps] * maxScale) + (averageVal*maxScale);//((vals[ps]*vals[ps])*pct) * (maxScale*.5);//averageVal * (maxScale*.5) +  ((vals[ps]*vals[ps])*pct) * (maxScale*.5);//maxScale*(vals[ps]);//(averageVal * 10 +  vals[ps] * 5 + .5);
+		
+		if( force!=force ) force = 0;
+		
 		//PS.sizes[i] = force;//1 + maxScale * vals[ps];
 		if(!PS.bOn[i] && PS.framesOn[i] > 0)
 		{
@@ -183,7 +187,9 @@ void grafVParticleField::updateDampingFromAudio(float val)
 
 void grafVParticleField::draw( float zdepth, int screenW, int screenH )
 {
-    ofNoFill();
+   // glEnable(GL_DEPTH_TEST);
+	
+	ofNoFill();
 	
     glPushMatrix();
 	
@@ -196,6 +202,8 @@ void grafVParticleField::draw( float zdepth, int screenW, int screenH )
 	
 	
     glPopMatrix();
+	
+	//glDisable(GL_DEPTH_TEST);
 	
 	
 	
