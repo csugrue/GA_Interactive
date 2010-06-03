@@ -7,6 +7,8 @@
 
 #define MAX_PARTICLES 10000
 
+
+
 class particleSystem
 {
     public:
@@ -22,7 +24,9 @@ class particleSystem
         void setParticleForce(float val);
         void setParticleDropOffRate(float val);
         void setParticleSize( float val );
-
+		
+		int getIndexOfRandomAliveParticle();
+		
         int w,h;
 
         float	pos[MAX_PARTICLES][3];

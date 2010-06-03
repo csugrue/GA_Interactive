@@ -3,8 +3,9 @@
 #include "ofMain.h"
 #include "ofxFft.h"
 #include "aubioAnalyzer.h"
+#include "statsRecorder.h"
 
-#define NUM_BANDS 512
+#define NUM_BANDS 256
 
 
 class AudioAnalyzer{
@@ -17,7 +18,7 @@ class AudioAnalyzer{
 		void setup();
 		void update();
 		void draw();
-	
+		
 		void plot(float* array, int length, float scale, float offset);
 		
 		int 	bufferCounter;
@@ -36,12 +37,15 @@ class AudioAnalyzer{
 		float	* fftOutput;
 		float	* audioInput;
 		
-		int bufferSize;
-		
-		bool bSetup;
+		int		bufferSize;
+		bool	bSetup;
 		
 		// aubio stuff
 		aubioAnalyzer	aubio;
-
+		
+		// stat recorders
+		statsRecorder	stats_pitch;
+		
+		
 };
 

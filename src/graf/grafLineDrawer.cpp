@@ -60,6 +60,13 @@ void grafLineDrawer::setup(vector<timePt> pts, float minLen, float maxLen, float
 		
 		if(bUseFadeInOut)	alphas.push_back(distAlpha*fadeAlpha);
 		else				alphas.push_back(distAlpha);
+		
+		pts_ro.push_back(pts_r[pts_r.size()-1]);
+		pts_lo.push_back(pts_l[pts_l.size()-1]);
+		
+		ofxVec2f vec = ofxVec2f(pts_r[pts_r.size()-1].x-pts_l[pts_l.size()-1].x,pts_r[pts_r.size()-1].y-pts_l[pts_l.size()-1].y);
+		vec = vec.normalize();
+		vecs.push_back(vec);
 	}
 	
 

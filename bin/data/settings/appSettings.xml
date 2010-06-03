@@ -20,7 +20,7 @@
     <val_0>2.000000</val_0>
 </LINE_WIDTH>
 <P_SIZE>
-    <val_0>2.000000</val_0>
+    <val_0>4.055555</val_0>
 </P_SIZE>
 <P_ALPHA>
     <val_0>0.750000</val_0>
@@ -59,5 +59,35 @@
     <val_0>5.555556</val_0>
 </outward_amp_force>
 <particle_size_force>
-    <val_0>22.000000</val_0>
+    <val_0>2.222222</val_0>
 </particle_size_force>
+<use_p_amp>
+    <val_0>1.000000</val_0>
+</use_p_amp>
+<use_p_size>
+    <val_0>1.000000</val_0>
+</use_p_size>
+<ROT_SPEED>
+    <val_0>2.000000</val_0>
+</ROT_SPEED>
+<p_audio_damp>
+    <val_0>1.000000</val_0>
+</p_audio_damp>
+<use_p_damp>
+    <val_0>0.000000</val_0>
+</use_p_damp>
+<wave_deform_force>
+    <val_0>0.500000</val_0>
+</wave_deform_force>
+<line_width_force>
+    <val_0>0.250000</val_0>
+</line_width_force>
+<wait_time>
+    <val_0>10.666667</val_0>
+</wait_time>
+<use_wave_deform>
+    <val_0>1.000000</val_0>
+</use_wave_deform>
+<use_line_width>
+    <val_0>0.000000</val_0>
+</use_line_width>

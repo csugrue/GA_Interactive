@@ -34,13 +34,22 @@ class grafVParticleField
 		float particle_alpha;
 		
 		int numXtras;
+		
+		// random new particles that drop
+		// need vector of particles: pos, sizes, vel, origin?, alive time etc.
+		// vector of bands, if band goes above threshold, turn on, when drops down, create particles and wait time before creating another on that band
+		// update gravity on these particles, and physics etc.
+		// apply same global aplha for fade out
+		// reset/clear all 
+		
+		// particles with attached lines
+		particleSystem  PS;
 	
     protected:
 		
 		int w, h;
 	
-		// particles with attached lines
-		particleSystem  PS;
+		
 	
 		// solo particles
 		particleSystem XTRA_PS[4];

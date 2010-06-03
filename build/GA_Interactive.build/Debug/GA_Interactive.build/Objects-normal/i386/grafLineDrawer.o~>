@@ -1,0 +1,2 @@
+/Users/chris/Documents/openFrameworks/of_preRelease_v0061_osxSL_FAT/apps/graffitiAnalysis_interactive/GA_Interactive_v0.0/src/../src/graf/grafLineDrawer.cpp: In member function 'void grafLineDrawer::setup(std::vector<timePt, std::allocator<timePt> >, float, float, float, int, int, bool, bool)':
+/Users/chris/Documents/openFrameworks/of_preRelease_v0061_osxSL_FAT/apps/graffitiAnalysis_interactive/GA_Interactive_v0.0/src/../src/graf/grafLineDrawer.cpp:69: error: 'vecs' was not declared in this scope

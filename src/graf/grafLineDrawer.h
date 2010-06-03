@@ -24,8 +24,10 @@ class grafLineDrawer
 		vector<ofPoint> pts_l;
 		vector<ofPoint> pts_r;
 	
-		vector<ofPoint> pts_lo;
+		vector<ofPoint> pts_lo;	// origins so can deform after
 		vector<ofPoint> pts_ro;
+		
+		vector<ofxVec2f> vecs;	// vectors of one end point to other
 	
 		vector<float>	alphas;
 	

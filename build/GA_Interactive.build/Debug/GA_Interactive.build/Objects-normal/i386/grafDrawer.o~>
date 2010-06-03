@@ -1,0 +1,1 @@
+/Users/chris/Documents/openFrameworks/of_preRelease_v0061_osxSL_FAT/apps/graffitiAnalysis_interactive/GA_Interactive_v0.0/src/../src/graf/grafDrawer.cpp:133: error: no 'void grafDrawer::transitionBounce(float, float)' member function declared in class 'grafDrawer'

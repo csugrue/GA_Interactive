@@ -9,6 +9,8 @@ grafDrawer::grafDrawer()
 	lineAlpha = .92;
 	lineScale = .05;
 	bSetupDrawer = false;
+	pctTransLine = .001;
+	
 }
 
 grafDrawer::~grafDrawer()
@@ -46,6 +48,7 @@ void grafDrawer::setup(grafTagMulti * myTag, float maxLen )
 	}
 	
 	bSetupDrawer = false;
+	pctTransLine = .001;
 	
 }
 
@@ -76,6 +79,82 @@ void grafDrawer::transition( float dt, float pct )
 {
 	average(pct);
 	alpha -= .35*dt;
+}
+
+
+void grafDrawer::transitionDeform( float dt, float pct, float * amps, int numAmps  )
+{
+	float pctMe = 1-pctTransLine;
+	float pctLn = pctTransLine;
+	
+	
+	for( int i = 0; i < lines.size(); i++)
+	{
+		for( int j = 0; j < lines[i]->pts_l.size(); j++)
+		{
+			int ps = 1+(j % (numAmps-1));
+			float bandH = pct*(amps[ps]);
+			
+			lines[i]->pts_l[j].y = pctMe*lines[i]->pts_l[j].y+pctLn*(lines[i]->pts_lo[j].y+bandH);//.9*lines[i]->pts_l[j].y+.1*bandH;
+			lines[i]->pts_r[j].y = pctMe*lines[i]->pts_r[j].y+pctLn*(lines[i]->pts_ro[j].y+bandH);//.9*lines[i]->pts_r[j].y+.1*bandH;
+			
+		}
+		
+	}
+	
+	//if( pctTransLine < .1 ) pctTransLine += .001;
+	
+}
+
+void grafDrawer::transitionLineWidth( float dt, float avg )
+{
+	float pctMe = 1-pctTransLine;
+	float pctLn = pctTransLine;
+	
+	
+	for( int i = 0; i < lines.size(); i++)
+	{
+		for( int j = 0; j < lines[i]->pts_l.size(); j++)
+		{			
+			lines[i]->pts_l[j].x = pctMe*lines[i]->pts_l[j].x+pctLn*(lines[i]->pts_lo[j].x+avg*-lines[i]->vecs[j].x);
+			lines[i]->pts_l[j].y = pctMe*lines[i]->pts_l[j].y+pctLn*(lines[i]->pts_lo[j].y+avg*-lines[i]->vecs[j].y);
+			
+			lines[i]->pts_r[j].x = pctMe*lines[i]->pts_r[j].x+pctLn*(lines[i]->pts_ro[j].x+avg*lines[i]->vecs[j].x);
+			lines[i]->pts_r[j].y = pctMe*lines[i]->pts_r[j].y+pctLn*(lines[i]->pts_ro[j].y+avg*lines[i]->vecs[j].y);
+		}
+		
+	}
+	
+	//if( pctTransLine < .1 ) pctTransLine += .001;
+	//alpha -= .35*dt;
+	
+}
+
+void grafDrawer::transitionBounce( float dt, float avg )
+{
+	float pctMe = 1-pctTransLine;
+	float pctLn = pctTransLine;
+	
+	
+	for( int i = 0; i < lines.size(); i++)
+	{
+		for( int j = 0; j < lines[i]->pts_l.size(); j++)
+		{			
+			lines[i]->pts_l[j].y = pctMe*lines[i]->pts_l[j].y+pctLn*(lines[i]->pts_lo[j].y+avg);
+			lines[i]->pts_r[j].y = pctMe*lines[i]->pts_r[j].y+pctLn*(lines[i]->pts_ro[j].y+avg);
+		}
+		
+	}
+	
+	//if( pctTransLine < .1 ) pctTransLine += .001;
+	//alpha -= .35*dt;
+	
+}
+
+void grafDrawer::resetTransitions()
+{
+pctTransLine=.001;
+prelimTransTime = 0;
 }
 
 void grafDrawer::average( float pct )

@@ -28,7 +28,7 @@ grafTagMulti::grafTagMulti()
 	ofAddListener(ofEvents.mouseReleased, this, &grafTagMulti::mouseReleased);
 	ofAddListener(ofEvents.mouseDragged, this, &grafTagMulti::mouseDragged);
 	
-	bMouseActive = true;
+	bMouseActive = false;
 	lastX = 0;
 	lastY = 0;
 }
@@ -97,7 +97,7 @@ bool grafTagMulti::addNewPoint(ofPoint pt, float dist, float angle, float time, 
 
     if( bPtsEmpty || dist > minPtDist ) myPoint.dist = dist;
     else{ 
-		printf("grafTag: can´t add, dist too small \n"); 
+		//printf("grafTag: can´t add, dist too small \n"); 
 		return false; 
 	}
 

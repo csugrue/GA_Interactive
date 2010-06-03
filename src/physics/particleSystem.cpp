@@ -90,7 +90,7 @@ void particleSystem::setup(int fieldsize, int fw, int fh, float screenW, float s
 
 	reset(fw,fh);
 
-	cout << " total particles: " << numParticles << " max " << MAX_PARTICLES << endl;
+	//cout << " total particles: " << numParticles << " max " << MAX_PARTICLES << endl;
 
 }
 
@@ -325,4 +325,21 @@ void particleSystem::draw(float time, float alpha, float size,  bool bDrawLines)
 
 	//glDisable(GL_DEPTH_TEST);
 	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+int particleSystem::getIndexOfRandomAliveParticle()
+{
+	vector<int> rIds;
+	for( int i = 0; i < numParticles; i++)
+	{
+	if(framesOn[i] > 0) rIds.push_back(i);
+	}
+	
+	if( rIds.size() > 0 )
+	{
+	int rNum = ofRandom(0,rIds.size()-1);
+	return rIds[rNum];
+	}else
+		return 0;
 }

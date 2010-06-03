@@ -15,8 +15,13 @@ class grafDrawer
 		void draw( int lastStroke, int lastPoint);
 		void drawTimeLine( ofPoint center, float currentTime, float startTime, float z_const, ofTrueTypeFont * font, float scale );
 		void drawBoundingBox( ofPoint pmin, ofPoint pmax, ofPoint pcenter );
-	
+		
 		void transition( float dt, float pct );
+		void transitionDeform( float dt, float pct, float * amps, int numAmps  );
+		void transitionLineWidth( float dt, float avg );
+		void transitionBounce( float dt, float avg );
+		void resetTransitions();
+		
 		void average( float pct );
 		void setAlpha(float a);
 		void setLineScale( float val );
@@ -32,8 +37,10 @@ class grafDrawer
 	
 		bool bSetupDrawer;
 	
-	
-	
+		float pctTransLine;	// pct to make transition with deformed line 
+		float prelimTransTime;	// time to play first transition (deform, amp etc.)
+	//	float prelimTransWait;
+		
     protected:
     private:
 };

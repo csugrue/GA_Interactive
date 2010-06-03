@@ -15,6 +15,7 @@
 #include "ofThreadedImage.h"
 #include "audioAnalyzer.h"
 #include "ofxFileDialog.h"
+#include "dropParticles.h"
 
 #define TAG_DIRECTORY	"tags/"
 
@@ -57,8 +58,15 @@ class GrafPlayerApp{
 		string getCurrentTagName();
 	
 	
+		void drawAudioLine();
+		
+		
 		//---------- audio analysis
 		AudioAnalyzer	audio;
+		
+		//---------- effects
+		DropParticles	drops;
+		
 		
 		//---------- loading data
 		grafIO					gIO;					// gml loader/saver

@@ -9,13 +9,13 @@ AudioAnalyzer::AudioAnalyzer(){
 
 AudioAnalyzer::~AudioAnalyzer(){
 
-	/*delete [] eqFunction;
+	delete [] eqFunction;
 	delete [] eqOutput;
 	delete [] ifftOutput;
 	delete [] fftOutput;
-	delete [] audioInput;*/
-	//delete fft;
-	
+	delete [] audioInput;
+	delete fft;
+	//ofSoundStreamClose();
 }
 
 
@@ -39,16 +39,16 @@ void AudioAnalyzer::setup(){
 	// this describes a linear low pass filter
 	for(int i = 0; i < fft->getBinSize(); i++)
 		eqFunction[i] = .1*powf((float)i,1.1);//(float) (fft->getBinSize() - i) / (float) fft->getBinSize();
+	//eqFunction[i] = (float) (fft->getBinSize() - i) / (float) fft->getBinSize();
 
-
-	//memset(normalizedValues,0.f,NUM_BANDS*sizeof(float) );
-	//memset(normInputValues,0.f,NUM_BANDS*sizeof(float) );
-	//memset(audioInput,0.f,NUM_BANDS*sizeof(float));
 	
 	aubio.setup();
+	
+	stats_pitch.setup(100,0,5000);
 
 	bSetup = true;
 
+	cout << "buffersize " << bufferSize << " binsize" << fft->getBinSize() << endl;
 }
 
 
@@ -68,9 +68,13 @@ void AudioAnalyzer::update(){
 	memcpy(ifftOutput, fft->getSignal(), sizeof(float) * fft->getSignalSize());
 	
 	
-	averageVal = 0;
+	aubio.processAudio(audioInput, NUM_BANDS);
+	
+	averageVal = aubio.amplitude;
 	maxVal	 = 0;
 		
+	stats_pitch.update(aubio.pitch);
+	
 	/*
 	// normalize values using the max
 	int binSize = fft->getBinSize();
@@ -88,7 +92,7 @@ void AudioAnalyzer::update(){
 	// calculate the average value
 	averageVal /= (float)binSize;*/
 	
-	aubio.processAudio(audioInput, NUM_BANDS);
+	
 }
 
 //--------------------------------------------------------------
@@ -109,10 +113,14 @@ void AudioAnalyzer::draw(){
 	ofDrawBitmapString("FFT Output", 0, 0);
 	plot(fftOutput, fft->getBinSize(), -plotHeight, plotHeight / 2);
 	
+	ofSetColor(255,0,0,200);
+	ofLine(0,-averageVal*plotHeight+plotHeight,fft->getBinSize(),-averageVal*plotHeight+plotHeight);
+	ofSetColor(255,255,255,255);
+	
 	ofPushMatrix();
-	glTranslatef(fft->getBinSize(), 0, 0);
-	ofDrawBitmapString("EQd FFT Output", 0, 0);
-	plot(eqOutput, fft->getBinSize(), -plotHeight, plotHeight / 2);
+		glTranslatef(fft->getBinSize(), 0, 0);
+		ofDrawBitmapString("EQd FFT Output", 0, 0);
+		plot(eqOutput, fft->getBinSize(), -plotHeight, plotHeight / 2);
 	ofPopMatrix();
 	
 	glTranslatef(0, plotHeight + 16, 0);
@@ -120,6 +128,10 @@ void AudioAnalyzer::draw(){
 	plot(ifftOutput, fft->getSignalSize(), plotHeight / 2, 0);
 	
 	ofPopMatrix();
+	
+	ofDrawBitmapString( "pitch is : " + ofToString((int)aubio.pitch) + "\namplitude is : " + ofToString(aubio.amplitude,3), 10,600);
+
+	stats_pitch.draw(16,460,100,100,10);
 	
 	//---- draw audio analysis
 	/*ofFill();

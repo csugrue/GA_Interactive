@@ -14,6 +14,9 @@
 		832AF68E11B0241100E10D66 /* ofxFft.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 832AF68B11B0241100E10D66 /* ofxFft.cpp */; };
 		832AF6A311B0245900E10D66 /* kiss_fftr.c in Sources */ = {isa = PBXBuildFile; fileRef = 832AF69F11B0245900E10D66 /* kiss_fftr.c */; };
 		832AF6A411B0245900E10D66 /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 832AF6A111B0245900E10D66 /* kiss_fft.c */; };
+		837A63C711B1480100E5E931 /* statsRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 837A63C611B1480100E5E931 /* statsRecorder.cpp */; };
+		837A63CB11B1483D00E5E931 /* ofxFileDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 837A63CA11B1483D00E5E931 /* ofxFileDialog.cpp */; };
+		837A643011B296D000E5E931 /* dropParticles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 837A642F11B296D000E5E931 /* dropParticles.cpp */; };
 		83B10BEA11AD55250010F6B9 /* grafPlayerApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83B10BE811AD55250010F6B9 /* grafPlayerApp.cpp */; };
 		83B10BF311AD554C0010F6B9 /* grafVParticleField.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83B10BEB11AD554C0010F6B9 /* grafVParticleField.cpp */; };
 		83B10BF411AD554C0010F6B9 /* grafPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83B10BEF11AD554C0010F6B9 /* grafPlayer.cpp */; };
@@ -24,7 +27,6 @@
 		83B10C0011AD555B0010F6B9 /* ofThreadedImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83B10BFF11AD555B0010F6B9 /* ofThreadedImage.cpp */; };
 		83B10C0411AD558A0010F6B9 /* audioAnalyzer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83B10C0211AD558A0010F6B9 /* audioAnalyzer.cpp */; };
 		83B10C4311AD57B80010F6B9 /* pocoDirectoryLister.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83B10C4111AD57B80010F6B9 /* pocoDirectoryLister.cpp */; };
-		83B10D2911AD7E320010F6B9 /* ofxFileDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83B10D2811AD7E320010F6B9 /* ofxFileDialog.cpp */; };
 		83DDD59F118ED412007567E9 /* ofxControlPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83DDD59A118ED412007567E9 /* ofxControlPanel.cpp */; };
 		83DDD5A2118ED437007567E9 /* grafTagMulti.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83DDD5A1118ED437007567E9 /* grafTagMulti.cpp */; };
 		83DDD5A5118ED461007567E9 /* grafIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83DDD5A3118ED461007567E9 /* grafIO.cpp */; };
@@ -179,6 +181,12 @@
 		832AF6A011B0245900E10D66 /* kiss_fft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = kiss_fft.h; path = audio/ofxFft/libs/kiss/kiss_fft.h; sourceTree = "<group>"; };
 		832AF6A111B0245900E10D66 /* kiss_fft.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kiss_fft.c; path = audio/ofxFft/libs/kiss/kiss_fft.c; sourceTree = "<group>"; };
 		832AF6A211B0245900E10D66 /* _kiss_fft_guts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = _kiss_fft_guts.h; path = audio/ofxFft/libs/kiss/_kiss_fft_guts.h; sourceTree = "<group>"; };
+		837A63C511B1480100E5E931 /* statsRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = statsRecorder.h; path = src/utils/statsRecorder.h; sourceTree = "<group>"; };
+		837A63C611B1480100E5E931 /* statsRecorder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = statsRecorder.cpp; path = src/utils/statsRecorder.cpp; sourceTree = "<group>"; };
+		837A63C911B1483D00E5E931 /* ofxFileDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxFileDialog.h; path = src/utils/ofxFileDialog.h; sourceTree = "<group>"; };
+		837A63CA11B1483D00E5E931 /* ofxFileDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxFileDialog.cpp; path = src/utils/ofxFileDialog.cpp; sourceTree = "<group>"; };
+		837A642E11B296D000E5E931 /* dropParticles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dropParticles.h; sourceTree = "<group>"; };
+		837A642F11B296D000E5E931 /* dropParticles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dropParticles.cpp; sourceTree = "<group>"; };
 		83B10BE811AD55250010F6B9 /* grafPlayerApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = grafPlayerApp.cpp; path = apps/grafPlayerApp.cpp; sourceTree = "<group>"; };
 		83B10BE911AD55250010F6B9 /* grafPlayerApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = grafPlayerApp.h; path = apps/grafPlayerApp.h; sourceTree = "<group>"; };
 		83B10BEB11AD554C0010F6B9 /* grafVParticleField.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = grafVParticleField.cpp; path = src/graf/grafVParticleField.cpp; sourceTree = "<group>"; };
@@ -199,8 +207,6 @@
 		83B10C0311AD558A0010F6B9 /* audioAnalyzer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audioAnalyzer.h; path = audio/audioAnalyzer.h; sourceTree = "<group>"; };
 		83B10C4111AD57B80010F6B9 /* pocoDirectoryLister.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pocoDirectoryLister.cpp; sourceTree = "<group>"; };
 		83B10C4211AD57B80010F6B9 /* pocoDirectoryLister.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pocoDirectoryLister.h; sourceTree = "<group>"; };
-		83B10D2711AD7E320010F6B9 /* ofxFileDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxFileDialog.h; path = ../GA_Player_v2.20/src/utils/ofxFileDialog.h; sourceTree = SOURCE_ROOT; };
-		83B10D2811AD7E320010F6B9 /* ofxFileDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxFileDialog.cpp; path = ../GA_Player_v2.20/src/utils/ofxFileDialog.cpp; sourceTree = SOURCE_ROOT; };
 		83DDD588118ED412007567E9 /* guiBaseObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = guiBaseObject.h; sourceTree = "<group>"; };
 		83DDD589118ED412007567E9 /* guiColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = guiColor.h; sourceTree = "<group>"; };
 		83DDD58A118ED412007567E9 /* guiCustomImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = guiCustomImpl.h; sourceTree = "<group>"; };
@@ -551,6 +557,8 @@
 		83B10BF711AD55540010F6B9 /* physics */ = {
 			isa = PBXGroup;
 			children = (
+				837A642E11B296D000E5E931 /* dropParticles.h */,
+				837A642F11B296D000E5E931 /* dropParticles.cpp */,
 				83B10BF811AD55540010F6B9 /* particleSystem.cpp */,
 				83B10BF911AD55540010F6B9 /* particleSystem.h */,
 				83B10BFA11AD55540010F6B9 /* vectorField.cpp */,
@@ -572,8 +580,10 @@
 		83DDD57A118ED3E5007567E9 /* utils */ = {
 			isa = PBXGroup;
 			children = (
-				83B10D2711AD7E320010F6B9 /* ofxFileDialog.h */,
-				83B10D2811AD7E320010F6B9 /* ofxFileDialog.cpp */,
+				837A63C511B1480100E5E931 /* statsRecorder.h */,
+				837A63C611B1480100E5E931 /* statsRecorder.cpp */,
+				837A63C911B1483D00E5E931 /* ofxFileDialog.h */,
+				837A63CA11B1483D00E5E931 /* ofxFileDialog.cpp */,
 				83B10C4011AD57B80010F6B9 /* io */,
 				83B10BFE11AD555B0010F6B9 /* ofThreadedImage.h */,
 				83B10BFF11AD555B0010F6B9 /* ofThreadedImage.cpp */,
@@ -590,9 +600,9 @@
 				83B10BEB11AD554C0010F6B9 /* grafVParticleField.cpp */,
 				83B10BEC11AD554C0010F6B9 /* grafPlayer.h */,
 				83B10BED11AD554C0010F6B9 /* grafDrawer.h */,
+				83B10BF111AD554C0010F6B9 /* grafDrawer.cpp */,
 				83B10BEF11AD554C0010F6B9 /* grafPlayer.cpp */,
 				83B10BF011AD554C0010F6B9 /* grafLineDrawer.cpp */,
-				83B10BF111AD554C0010F6B9 /* grafDrawer.cpp */,
 				83B10BF211AD554C0010F6B9 /* grafLineDrawer.h */,
 				83DDDEE41192D5CE007567E9 /* grafCurveSmoother.h */,
 				83DDDEE51192D5CE007567E9 /* grafCurveSmoother.cpp */,
@@ -1451,13 +1461,15 @@
 				83B10C0011AD555B0010F6B9 /* ofThreadedImage.cpp in Sources */,
 				83B10C0411AD558A0010F6B9 /* audioAnalyzer.cpp in Sources */,
 				83B10C4311AD57B80010F6B9 /* pocoDirectoryLister.cpp in Sources */,
-				83B10D2911AD7E320010F6B9 /* ofxFileDialog.cpp in Sources */,
 				832AF5DA11B015F000E10D66 /* aubioAnalyzer.cpp in Sources */,
 				832AF68C11B0241100E10D66 /* ofxFftw.cpp in Sources */,
 				832AF68D11B0241100E10D66 /* ofxFftBasic.cpp in Sources */,
 				832AF68E11B0241100E10D66 /* ofxFft.cpp in Sources */,
 				832AF6A311B0245900E10D66 /* kiss_fftr.c in Sources */,
 				832AF6A411B0245900E10D66 /* kiss_fft.c in Sources */,
+				837A63C711B1480100E5E931 /* statsRecorder.cpp in Sources */,
+				837A63CB11B1483D00E5E931 /* ofxFileDialog.cpp in Sources */,
+				837A643011B296D000E5E931 /* dropParticles.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

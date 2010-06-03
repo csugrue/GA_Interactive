@@ -132,7 +132,7 @@ void grafVParticleField::updateParticleSizes(float * vals, float averageVal, int
 	for( int i = 0; i < PS.numParticles; i++)
 	{
 		int ps = i % tVals;
-		float force = PS.psize * (averageVal * maxScale +  vals[ps] * (maxScale*.5) + 1);
+		float force = PS.psize * ( (averageVal * maxScale) +  (vals[ps] * maxScale) + 1);
 		if(force!=force) force = 0;
 		PS.sizes[i] = .9*PS.sizes[i]+.1*force;//1 + maxScale * vals[ps];
 		
@@ -156,7 +156,7 @@ void grafVParticleField::updateParticleAmpli(float * vals, float averageVal, int
 	{
 		int ps = i % tVals;
 		float pct = 1;//1.5*powf((ps/(float)tVals),1.5);//.5+((ps/(float)tVals));
-		float force = (vals[ps] * maxScale) + (averageVal*maxScale);//((vals[ps]*vals[ps])*pct) * (maxScale*.5);//averageVal * (maxScale*.5) +  ((vals[ps]*vals[ps])*pct) * (maxScale*.5);//maxScale*(vals[ps]);//(averageVal * 10 +  vals[ps] * 5 + .5);
+		float force = (vals[ps]*maxScale) + (averageVal*maxScale*2);//((vals[ps]*vals[ps])*pct) * (maxScale*.5);//averageVal * (maxScale*.5) +  ((vals[ps]*vals[ps])*pct) * (maxScale*.5);//maxScale*(vals[ps]);//(averageVal * 10 +  vals[ps] * 5 + .5);
 		
 		if( force!=force ) force = 0;
 		
@@ -178,11 +178,13 @@ void grafVParticleField::updateParticleAmpli(float * vals, float averageVal, int
 
 void grafVParticleField::updateDampingFromAudio(float val)
 {
-	val = particle_damping * val;
+	if( val > 0 ) val = particle_damping + val;
+	else val = particle_damping;
+	
 	PS.setParticleDropOffRate(val);
 	
-    for( int i = 0; i < numXtras; i++) 
-		XTRA_PS[i].dropOffRate = (.8*val) - (i*.01f );
+    //for( int i = 0; i < numXtras; i++) 
+	//	XTRA_PS[i].dropOffRate = (.8*val) - (i*.01f );
 }
 
 void grafVParticleField::draw( float zdepth, int screenW, int screenH )

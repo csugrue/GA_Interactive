@@ -74,6 +74,8 @@ void GrafPlayerApp::setup(){
 	
 	audio.setup();
 	
+	//drops.setup(30);
+	
 	// temp
 	panel.setSelectedPanel("Audio Settings");
 
@@ -119,11 +121,29 @@ void GrafPlayerApp::update(){
 		{
 			
 			bTrans = true;
+			
 			// fade away, dissolve
-			drawer.transition(dt,.015);
-			if( bUseGravity ) 
-				particleDrawer.fall(dt);
-			if(particleDrawer.alpha  > 0 ) particleDrawer.alpha -= .5*dt;
+			//
+			
+			float deform_frc = panel.getValueF("wave_deform_force");
+			float line_amp_frc = panel.getValueF("line_width_force");
+			
+			if( panel.getValueB("use_wave_deform") ) drawer.transitionDeform( dt,deform_frc, audio.audioInput, NUM_BANDS);
+			if( panel.getValueB("use_line_width") ) drawer.transitionLineWidth( dt,audio.averageVal*line_amp_frc);
+			if( panel.getValueB("use_bounce") ) drawer.transitionBounce( dt,audio.averageVal*line_amp_frc);
+			if( drawer.pctTransLine < .1 ) drawer.pctTransLine += .001;
+			drawer.prelimTransTime += dt;
+			
+			if(drawer.prelimTransTime > panel.getValueI("wait_time") )
+			{
+				// do average transition
+				drawer.transition(dt,.015);
+				
+				if( bUseGravity ) 
+					particleDrawer.fall(dt);
+			
+				if(particleDrawer.alpha  > 0 ) particleDrawer.alpha -= .5*dt;
+			}
 			
 		}
 		else if (  !myTagPlayer.bPaused && myTagPlayer.bDonePlaying )							
@@ -141,28 +161,37 @@ void GrafPlayerApp::update(){
 		if( lastPoint <= 0 )			myTagPlayer.bReset = true;
 		if( tags[currentTagID].myStrokes[ lastStroke].pts.size()-1 == lastPoint ) myTagPlayer.bReset = true;
 		
-		particleDrawer.update( myTagPlayer.getCurrentPoint(),myTagPlayer.getVelocityForTime(&tags[currentTagID]),  dt,  myTagPlayer.bReset);
 		
 		
 		//---------- AUDIO applied
 		if(panel.getValueB("use_p_size") ) 
-			particleDrawer.updateParticleSizes(audio.ifftOutput,audio.averageVal, NUM_BANDS,panel.getValueF("particle_size_force") );
+			particleDrawer.updateParticleSizes(audio.eqOutput,audio.averageVal, NUM_BANDS,panel.getValueF("particle_size_force") );
 		
-		//particleDrawer.updateDampingFromAudio(audio.averageVal+.5);
+		particleDrawer.setDamping( panel.getValueF("P_DAMP") );
+		//if(panel.getValueB("use_p_damp") ) 
+		//	particleDrawer.updateDampingFromAudio(panel.getValueF("p_audio_damp")*audio.averageVal*.1);
 		
 		if(!bTrans && panel.getValueB("use_p_amp") ) 
 			particleDrawer.updateParticleAmpli(audio.ifftOutput,audio.averageVal, NUM_BANDS,panel.getValueF("outward_amp_force") );
+		
+		// update particle drops (audio stuff);
+		drops.update(dt);
+		
 		//---------
 		
 		
 		
+		//--------- PARTICLES
+		particleDrawer.update( myTagPlayer.getCurrentPoint(),myTagPlayer.getVelocityForTime(&tags[currentTagID]),  dt,  myTagPlayer.bReset);
 		myTagPlayer.bReset = false; // important so no particle error on first stroke
-		prevStroke		= myTagPlayer.getCurrentStroke();
-		//---
+
+		//--------- 
 		
+		
+		prevStroke		= myTagPlayer.getCurrentStroke();		
 		
 		// update rotation
-		if(bRotating) rotationY += .65*dt;
+		if(bRotating) rotationY += panel.getValueF("ROT_SPEED")*dt;
 		
 		// update pos / vel
 		tags[currentTagID].position.x += tagPosVel.x;
@@ -171,12 +200,14 @@ void GrafPlayerApp::update(){
 		tagPosVel.x -= .1*tagPosVel.x;
 		tagPosVel.y -= .1*tagPosVel.y;
 		
+		cout << "rotationY " << rotationY << endl;
 		
 		
 	}
 	
 	if( bShowPanel ) updateConrolPanel();
 	
+	// update audio
 	audio.update();
 }
 
@@ -185,18 +216,15 @@ void GrafPlayerApp::update(){
 void GrafPlayerApp::draw(){
 
 	ofEnableAlphaBlending();
-	
 	ofSetColor(255,255,255,255);
 
 	if( mode == PLAY_MODE_LOAD )
 	{
+		;
 	}
 	else if( mode == PLAY_MODE_PLAY )
 	{
 	
-		
-		ofEnableAlphaBlending();
-		
 		glPushMatrix();
 		
 		
@@ -225,19 +253,34 @@ void GrafPlayerApp::draw(){
 				glTranslatef(-tags[currentTagID].center.x*tags[currentTagID].drawScale,-tags[currentTagID].center.y*tags[currentTagID].drawScale,-tags[currentTagID].center.z);
 		
 				glDisable(GL_DEPTH_TEST);
+				
 				particleDrawer.draw(myTagPlayer.getCurrentPoint().z,  screenW,  screenH);
+				drops.draw();
+				
+				
 				
 				glEnable(GL_DEPTH_TEST);
-		
+				
+				ofSetColor(255,0,0);
+				glPushMatrix();
+					glScalef( tags[currentTagID].drawScale, tags[currentTagID].drawScale, 1);
+					//drawAudioLine();
+				glPopMatrix();
+	
+				
 				glPushMatrix();
 					glScalef( tags[currentTagID].drawScale, tags[currentTagID].drawScale, 1);
 					drawer.draw( myTagPlayer.getCurrentStroke(), myTagPlayer.getCurrentId() );
+					
 				glPopMatrix();
 		
 				glPushMatrix();
 					glScalef( tags[currentTagID].drawScale, tags[currentTagID].drawScale, 1);
+					
 					//drawer.drawBoundingBox( tags[currentTagID].min, tags[currentTagID].max, tags[currentTagID].center );
 				glPopMatrix();
+				
+				
 		
 			glPopMatrix();
 		
@@ -330,13 +373,21 @@ void GrafPlayerApp::keyPressed (ofKeyEventArgs & event){
 		
 		case 's': bTakeScreenShot = true; break;
 			
-	
+		 
 		default:
   			break;
 
   }
 
-
+	if( event.key == '/')
+	{
+		int randomP = particleDrawer.PS.getIndexOfRandomAliveParticle();//ofRandom( 0, particleDrawer.PS.numParticles );
+		ofPoint pPos = ofPoint(particleDrawer.PS.pos[randomP][0],particleDrawer.PS.pos[randomP][1],particleDrawer.PS.pos[randomP][2]);
+		ofPoint pVel = ofPoint(particleDrawer.PS.vel[randomP][0],particleDrawer.PS.vel[randomP][1],particleDrawer.PS.vel[randomP][2]);
+		drops.createRandomDrop( pPos, pVel, particleDrawer.PS.sizes[randomP] );
+		
+	}
+	
 
 }
 
@@ -364,6 +415,7 @@ void GrafPlayerApp::mouseDragged(ofMouseEventArgs & event ){
 		{
 			if(!bShiftOn)
 			{
+				
 				tagPosVel.x +=  tagMoveForce * (event.x-lastX);
 				tagPosVel.y +=  tagMoveForce * (event.y-lastY);
 			}else if(tags.size() > 0){
@@ -440,7 +492,7 @@ void GrafPlayerApp::nextTag(int dir)
 		if(currentTagID < 0 ) currentTagID = tags.size()-1;
 	}
 		
-	
+	drawer.resetTransitions();
 }
 //--------------------------------------------------------------
 void GrafPlayerApp::loadTags()
@@ -510,7 +562,7 @@ void GrafPlayerApp::preLoadTags()
 void GrafPlayerApp::setupContolPanel()
 {
 	
-	panel.setup("GA 2.0: Audio", ofGetWidth()-320, 20, 300, 500);
+	panel.setup("GA 2.0: Audio", ofGetWidth()-320, 20, 300, 700);
 	panel.addPanel("App Settings", 1, false);
 	panel.addPanel("Draw Settings", 1, false);
 	panel.addPanel("Audio Settings", 1, false);
@@ -525,7 +577,8 @@ void GrafPlayerApp::setupContolPanel()
 	panel.addToggle("Use Fog", "USE_FOG", false);
 	panel.addSlider("Fog Start","FOG_START",fogStart,-2000,2000,true);
 	panel.addSlider("Fog End","FOG_END",fogEnd,-2000,2000,true);
-	
+	panel.addSlider("Rotation Speed","ROT_SPEED",.65,0,4,false);
+
 	//--- draw settings
 	panel.setWhichPanel("Draw Settings");
 	panel.addSlider("Line Alpha","LINE_ALPHA",.92,0,1,false);
@@ -547,10 +600,18 @@ void GrafPlayerApp::setupContolPanel()
 	panel.addToggle("open sound file", "open_sound_file", false);
 	panel.addSlider("outward amp force","outward_amp_force",8,0,200,false);
 	panel.addSlider("particle size force","particle_size_force",22,0,200,false);
-	
+	panel.addSlider("wave deform force","wave_deform_force",.25,0,2,false);
+	panel.addSlider("line width force","line_width_force",.25,0,2,false);
+	panel.addSlider("change wait time","wait_time",30,0,120,true);
+	//panel.addSlider("particle speed force","p_audio_damp",1,0,4,false);
+
 	// toggles to apply what to what...
 	panel.addToggle("use particle amp", "use_p_amp", true);
 	panel.addToggle("use particle size", "use_p_size", true);
+	//panel.addToggle("use particle speed", "use_p_damp", false);
+	panel.addToggle("use wave deform", "use_wave_deform", true);
+	panel.addToggle("use line width amp", "use_line_width", false);
+	panel.addToggle("use bounce", "use_bounce", true);
 	
 	//--- load saved
 	panel.loadSettings("settings/appSettings.xml");
@@ -582,7 +643,7 @@ void GrafPlayerApp::updateConrolPanel()
 	drawer.setLineScale( panel.getValueF("LINE_SCALE") );
 	
 	particleDrawer.setParticleSize( panel.getValueF("P_SIZE") );
-	particleDrawer.setDamping( panel.getValueF("P_DAMP") );
+	//particleDrawer.setDamping( panel.getValueF("P_DAMP") );
 	particleDrawer.particle_alpha = panel.getValueF("P_ALPHA") ;
 	particleDrawer.numXtras = panel.getValueI("P_NUM");
 	bUseGravity = panel.getValueB("USE_GRAVITY");
@@ -635,5 +696,38 @@ string GrafPlayerApp::getCurrentTagName()
 	if(tags.size() <= 0 ) return " ";
 	else if( mode == PLAY_MODE_LOAD) return tags[tags.size()-1].tagname;
 	else return tags[currentTagID].tagname;
+}
+
+void GrafPlayerApp::drawAudioLine()
+{
+	if(tags.size() <= 0 ) return;
+	
+	// get vector of z for each pt in tag
+	vector<float> zDepths;
+	
+	for( int i = 0; i < tags[currentTagID].myStrokes.size(); i++)
+	{
+		for( int j = 0; j < tags[currentTagID].myStrokes[i].pts.size(); j++)
+		{
+			zDepths.push_back( tags[currentTagID ].myStrokes[i].pts[j].pos.z );
+		}
+		
+	}
+	
+	//cout << "tag center: " << tags[currentTagID].center.x << " " << tags[currentTagID].center.y << endl;
+	
+	glPushMatrix();
+		glTranslatef(tags[currentTagID].min.x,tags[currentTagID].min.y,tags[currentTagID].min.z);
+		glTranslatef(tags[currentTagID].center.x,tags[currentTagID].center.y,0);
+		glBegin(GL_LINE_STRIP);
+		for( int i = 0; i < zDepths.size(); i++)
+		{
+			int ps = i % NUM_BANDS;
+			float bandH = audio.ifftOutput[ps];//audioInput[ps];
+			//glVertex3f(0,0,zDepths[i]);
+			glVertex3f(0,bandH,zDepths[i]);
+		}
+		glEnd();
+	glPopMatrix();
 }
 

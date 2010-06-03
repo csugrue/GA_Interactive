@@ -55,7 +55,9 @@ void testApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void testApp::mousePressed(int x, int y, int button){
 
-	
+	int modifier = glutGetModifiers();
+	if( modifier == GLUT_ACTIVE_SHIFT) grafAudioPlayerApp.bShiftOn = true;
+	else grafAudioPlayerApp.bShiftOn = false;
 
 }
 
