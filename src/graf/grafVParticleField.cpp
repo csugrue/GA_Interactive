@@ -132,7 +132,7 @@ void grafVParticleField::updateParticleSizes(float * vals, float averageVal, int
 	for( int i = 0; i < PS.numParticles; i++)
 	{
 		int ps = i % tVals;
-		float force = PS.psize * ( (averageVal * maxScale) +  (vals[ps] * maxScale) + 1);
+		float force = PS.psize * ( 1 +  (vals[ps] * maxScale) );//+  (vals[ps] * maxScale) ) );
 		if(force!=force) force = 0;
 		PS.sizes[i] = .9*PS.sizes[i]+.1*force;//1 + maxScale * vals[ps];
 		
@@ -154,11 +154,12 @@ void grafVParticleField::updateParticleAmpli(float * vals, float averageVal, int
 {
 	for( int i = 0; i < PS.numParticles; i++)
 	{
-		int ps = i % tVals;
+		int ps = (i % (tVals-1))+1;
 		float pct = 1;//1.5*powf((ps/(float)tVals),1.5);//.5+((ps/(float)tVals));
 		float force = (vals[ps]*maxScale) + (averageVal*maxScale*2);//((vals[ps]*vals[ps])*pct) * (maxScale*.5);//averageVal * (maxScale*.5) +  ((vals[ps]*vals[ps])*pct) * (maxScale*.5);//maxScale*(vals[ps]);//(averageVal * 10 +  vals[ps] * 5 + .5);
 		
 		if( force!=force ) force = 0;
+		
 		
 		//PS.sizes[i] = force;//1 + maxScale * vals[ps];
 		if(!PS.bOn[i] && PS.framesOn[i] > 0)

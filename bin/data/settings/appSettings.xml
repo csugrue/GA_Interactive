@@ -56,10 +56,10 @@
     <val_0>0.000000</val_0>
 </open_sound_file>
 <outward_amp_force>
-    <val_0>5.555556</val_0>
+    <val_0>14.444445</val_0>
 </outward_amp_force>
 <particle_size_force>
-    <val_0>2.222222</val_0>
+    <val_0>87.777779</val_0>
 </particle_size_force>
 <use_p_amp>
     <val_0>1.000000</val_0>
@@ -68,7 +68,7 @@
     <val_0>1.000000</val_0>
 </use_p_size>
 <ROT_SPEED>
-    <val_0>2.000000</val_0>
+    <val_0>0.755556</val_0>
 </ROT_SPEED>
 <p_audio_damp>
     <val_0>1.000000</val_0>
@@ -77,13 +77,13 @@
     <val_0>0.000000</val_0>
 </use_p_damp>
 <wave_deform_force>
-    <val_0>0.500000</val_0>
+    <val_0>1.300000</val_0>
 </wave_deform_force>
 <line_width_force>
-    <val_0>0.250000</val_0>
+    <val_0>0.000000</val_0>
 </line_width_force>
 <wait_time>
-    <val_0>10.666667</val_0>
+    <val_0>14.666667</val_0>
 </wait_time>
 <use_wave_deform>
     <val_0>1.000000</val_0>
@@ -91,3 +91,12 @@
 <use_line_width>
     <val_0>0.000000</val_0>
 </use_line_width>
+<drop_p_thresh>
+    <val_0>0.100000</val_0>
+</drop_p_thresh>
+<use_bounce>
+    <val_0>0.000000</val_0>
+</use_bounce>
+<bounce_force>
+    <val_0>0.533333</val_0>
+</bounce_force>

@@ -12,6 +12,13 @@ void testApp::setup(){
 
 	grafAudioPlayerApp.setup();
 	
+	
+	// for video recording
+	movieSaver.setup(640,480, "GA_Audio.mov" );
+	movieSaver.setCodecType( OF_QT_SAVER_CODEC_QUALITY_NORMAL );
+	
+	bRecordingMovie	= false;
+	bUseRecorder	= false;
 }
 
 
@@ -29,10 +36,45 @@ void testApp::draw(){
 
 	grafAudioPlayerApp.draw();
 	
+	if(bRecordingMovie)
+	{
+		//cout << "rec" << endl;
+		int x = ofGetWidth()/2 - 320;
+		int y = ofGetHeight()/2 - 240;
+		ofImage img;
+		img.grabScreen(x,y,640,480);
+		movieSaver.addFrame(img.getPixels());
+		
+		ofFill();
+		ofSetColor(255, 0, 0);
+		ofRect(641, 481, 4, 4);
+		ofSetColor(255, 255, 255);
+	}
 }
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
+	
+	if( key == OF_KEY_F4 )
+	{
+		if(bUseRecorder)
+		{
+			if(bRecordingMovie) movieSaver.finishMovie();
+			bRecordingMovie = !bRecordingMovie;
+		}
+	}
+	
+	else if( key == OF_KEY_F3 )
+	{
+		bUseRecorder = !bUseRecorder;
+		if(bUseRecorder)
+		{
+			ofSetWindowShape(645, 485);
+		}
+		
+	}else if( key == 'f' || key == 'F' )
+		ofToggleFullscreen();
+		
 	
 }
 

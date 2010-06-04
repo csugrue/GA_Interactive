@@ -11,7 +11,7 @@
 
 DropParticles::DropParticles()
 {
-	baseSize		= 30.f;
+	baseSize		= 10.f;
 	baseAlpha		= 0.75f;
 	baseGravity		= 20.f;
 	baseAlphaFade	= .5f;
@@ -67,10 +67,7 @@ void DropParticles::update(float dt)
 	
 	for( int i = 0; i < particles.size(); i++)
 	{
-		// update state if faded out
-		if( particles[i].alpha <= 0 )
-			resetParticle( &particles[i] );
-			
+		
 		// if still alive, update velocity, framesOn, alpha
 		if(particles[i].bOn)
 		{
@@ -78,7 +75,7 @@ void DropParticles::update(float dt)
 			particles[i].pos += particles[i].vel;
 			particles[i].framesOn++;
 			
-			if( particles[i].framesOn > 30 && particles[i].alpha > 0) //(baseAlphaFade )
+			if( /*particles[i].framesOn > 30 &&*/ particles[i].alpha > 0) //(baseAlphaFade )
 				particles[i].alpha -= baseAlphaFade*dt;
 				
 			if( particles[i].size < baseSize )
@@ -87,6 +84,17 @@ void DropParticles::update(float dt)
 		
 	}
 	
+	
+	for( int i = particles.size()-1; i >=0; i--)
+	{
+		// update state if faded out
+		if( particles[i].alpha <= 0 )
+			particles.erase(particles.begin()+i);
+		//if( particles[i].alpha <= 0 )
+			
+		//resetParticle( &particles[i] );
+	
+	}
 }
 
 void DropParticles::turnOnParticle( ga_particle * p, ofPoint pos, float size)

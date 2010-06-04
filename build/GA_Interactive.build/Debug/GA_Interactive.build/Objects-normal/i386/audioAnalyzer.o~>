@@ -1,0 +1,8 @@
+/Users/chris/Documents/openFrameworks/of_preRelease_v0061_osxSL_FAT/apps/graffitiAnalysis_interactive/GA_Interactive_v0.0/src/audio/audioAnalyzer.cpp: In destructor 'AudioAnalyzer::~AudioAnalyzer()':
+/Users/chris/Documents/openFrameworks/of_preRelease_v0061_osxSL_FAT/apps/graffitiAnalysis_interactive/GA_Interactive_v0.0/src/audio/audioAnalyzer.cpp:18: error: 'blendfft' was not declared in this scope
+/Users/chris/Documents/openFrameworks/of_preRelease_v0061_osxSL_FAT/apps/graffitiAnalysis_interactive/GA_Interactive_v0.0/src/audio/audioAnalyzer.cpp: In member function 'void AudioAnalyzer::setup()':
+/Users/chris/Documents/openFrameworks/of_preRelease_v0061_osxSL_FAT/apps/graffitiAnalysis_interactive/GA_Interactive_v0.0/src/audio/audioAnalyzer.cpp:42: error: 'blendfft' was not declared in this scope
+/Users/chris/Documents/openFrameworks/of_preRelease_v0061_osxSL_FAT/apps/graffitiAnalysis_interactive/GA_Interactive_v0.0/src/audio/audioAnalyzer.cpp: In member function 'void AudioAnalyzer::update()':
+/Users/chris/Documents/openFrameworks/of_preRelease_v0061_osxSL_FAT/apps/graffitiAnalysis_interactive/GA_Interactive_v0.0/src/audio/audioAnalyzer.cpp:79: error: 'blendfft' was not declared in this scope
+/Users/chris/Documents/openFrameworks/of_preRelease_v0061_osxSL_FAT/apps/graffitiAnalysis_interactive/GA_Interactive_v0.0/src/audio/audioAnalyzer.cpp: In member function 'void AudioAnalyzer::draw()':
+/Users/chris/Documents/openFrameworks/of_preRelease_v0061_osxSL_FAT/apps/graffitiAnalysis_interactive/GA_Interactive_v0.0/src/audio/audioAnalyzer.cpp:139: error: 'blendfft' was not declared in this scope

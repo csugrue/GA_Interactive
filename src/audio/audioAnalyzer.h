@@ -25,8 +25,6 @@ class AudioAnalyzer{
 		int 	drawCounter;
 	
 		// fft
-		//float normalizedValues[NUM_BANDS];
-		//float normInputValues[NUM_BANDS];
 		float averageVal;
 		float maxVal;
 		
@@ -36,6 +34,9 @@ class AudioAnalyzer{
 		float	* ifftOutput;
 		float	* fftOutput;
 		float	* audioInput;
+		float	* blendfft;
+		
+		float	* avgBands;
 		
 		int		bufferSize;
 		bool	bSetup;
@@ -47,5 +48,14 @@ class AudioAnalyzer{
 		statsRecorder	stats_pitch;
 		
 		
+		// average of fft bands
+		int numAvgBands;
+		void calculateAverageFFTBands(float * vals, int totalVals);
+		
+		vector<float> peakFades;
+		float peakFadeVal;
+		float peakThreshold;
+		void updatePeaks(float threshold, float * vals, int numVals );
+		void plotPeaks( int length, float scale, float offset);
 };
 

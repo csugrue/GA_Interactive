@@ -13,6 +13,8 @@ Analyzes audio input and plays <gml> tags that respond to fft data.
 
 */
 
+#include "ofxQtVideoSaver.h"
+
 
 class testApp : public ofBaseApp{
 
@@ -33,15 +35,10 @@ class testApp : public ofBaseApp{
 		
 		GrafPlayerApp	grafAudioPlayerApp;
 		
-		// controls
-		//void setupControls();
-		//void updateControls();
-		
-		// control panel
-		/*ofxControlPanel	panel;
-		guiTypeFileLister * gmlLister;
-		simpleFileLister lister_gml;
-		int prevAudioInput;*/
+		//----- quicktime recording
+		ofxQtVideoSaver	movieSaver;
+		bool bRecordingMovie;
+		bool bUseRecorder;
 
 };
 

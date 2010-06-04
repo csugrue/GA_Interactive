@@ -104,8 +104,6 @@ void GrafPlayerApp::update(){
 		if( drawer.bSetupDrawer )
 			drawer.setup( &tags[currentTagID], tags[currentTagID].distMax );
 
-		
-		
 		//---- update tag playing state
 		if( !myTagPlayer.bDonePlaying )					
 		{
@@ -119,23 +117,24 @@ void GrafPlayerApp::update(){
 		}
 		else if ( !myTagPlayer.bPaused && myTagPlayer.bDonePlaying && (drawer.alpha > 0 || particleDrawer.alpha > 0))			  		
 		{
-			
-			bTrans = true;
-			
-			// fade away, dissolve
-			//
+						
+			//---- TRANSITIONS
+			// fade away, dissolve, deform etc.
 			
 			float deform_frc = panel.getValueF("wave_deform_force");
 			float line_amp_frc = panel.getValueF("line_width_force");
+			float bounce_frc = panel.getValueF("bounce_force");
 			
 			if( panel.getValueB("use_wave_deform") ) drawer.transitionDeform( dt,deform_frc, audio.audioInput, NUM_BANDS);
 			if( panel.getValueB("use_line_width") ) drawer.transitionLineWidth( dt,audio.averageVal*line_amp_frc);
-			if( panel.getValueB("use_bounce") ) drawer.transitionBounce( dt,audio.averageVal*line_amp_frc);
+			if( panel.getValueB("use_bounce") ) drawer.transitionBounce( dt,audio.averageVal*bounce_frc);
 			if( drawer.pctTransLine < .1 ) drawer.pctTransLine += .001;
 			drawer.prelimTransTime += dt;
 			
 			if(drawer.prelimTransTime > panel.getValueI("wait_time") )
 			{
+				bTrans = true;
+				
 				// do average transition
 				drawer.transition(dt,.015);
 				
@@ -174,6 +173,18 @@ void GrafPlayerApp::update(){
 		if(!bTrans && panel.getValueB("use_p_amp") ) 
 			particleDrawer.updateParticleAmpli(audio.ifftOutput,audio.averageVal, NUM_BANDS,panel.getValueF("outward_amp_force") );
 		
+		// create drops
+		for( int i = 0; i < audio.peakFades.size(); i++)
+		{
+			if( audio.peakFades[i] == 1 )
+			{
+				int randomP = particleDrawer.PS.getIndexOfRandomAliveParticle();//ofRandom( 0, particleDrawer.PS.numParticles );
+				ofPoint pPos = ofPoint(particleDrawer.PS.pos[randomP][0],particleDrawer.PS.pos[randomP][1],particleDrawer.PS.pos[randomP][2]);
+				ofPoint pVel = ofPoint(particleDrawer.PS.vel[randomP][0],particleDrawer.PS.vel[randomP][1],particleDrawer.PS.vel[randomP][2]);
+				drops.createRandomDrop( pPos, pVel, particleDrawer.PS.sizes[randomP] );
+			}
+		}
+		
 		// update particle drops (audio stuff);
 		drops.update(dt);
 		
@@ -200,7 +211,7 @@ void GrafPlayerApp::update(){
 		tagPosVel.x -= .1*tagPosVel.x;
 		tagPosVel.y -= .1*tagPosVel.y;
 		
-		cout << "rotationY " << rotationY << endl;
+		//cout << "rotationY " << rotationY << endl;
 		
 		
 	}
@@ -593,16 +604,19 @@ void GrafPlayerApp::setupContolPanel()
 	
 	//--- audio settings
 	panel.setWhichPanel("Audio Settings");
-	vector<string> names_audio_options;
+	/*vector<string> names_audio_options;
 	names_audio_options.push_back("line in");
 	names_audio_options.push_back("music file");
 	panel.addMultiToggle("audio input:", "audio_input", 1, names_audio_options);
-	panel.addToggle("open sound file", "open_sound_file", false);
+	panel.addToggle("open sound file", "open_sound_file", false);*/
 	panel.addSlider("outward amp force","outward_amp_force",8,0,200,false);
 	panel.addSlider("particle size force","particle_size_force",22,0,200,false);
 	panel.addSlider("wave deform force","wave_deform_force",.25,0,2,false);
 	panel.addSlider("line width force","line_width_force",.25,0,2,false);
+	panel.addSlider("bounce force","bounce_force",.25,0,2,false);
 	panel.addSlider("change wait time","wait_time",30,0,120,true);
+	panel.addSlider("drop p threshold","drop_p_thresh",.1,0,2,false);
+	
 	//panel.addSlider("particle speed force","p_audio_damp",1,0,4,false);
 
 	// toggles to apply what to what...
@@ -649,12 +663,13 @@ void GrafPlayerApp::updateConrolPanel()
 	bUseGravity = panel.getValueB("USE_GRAVITY");
 	bUseMask = panel.getValueB("USE_MASK");
 	
+	audio.peakThreshold = panel.getValueF("drop_p_thresh");
 	
 	//open audio files
 	if(panel.getSelectedPanelName() == "Audio Settings" )
 	{
 	
-			if( panel.getValueB("open_sound_file") )
+			/*if( panel.getValueB("open_sound_file") )
 			{
 					panel.setValueB("open_sound_file", false); 
 					
@@ -684,7 +699,7 @@ void GrafPlayerApp::updateConrolPanel()
 						}
 						
 					}
-			}
+			}*/
 	}
 	
 	

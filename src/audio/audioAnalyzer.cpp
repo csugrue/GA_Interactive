@@ -14,8 +14,10 @@ AudioAnalyzer::~AudioAnalyzer(){
 	delete [] ifftOutput;
 	delete [] fftOutput;
 	delete [] audioInput;
+	delete [] avgBands;
+	delete [] blendfft;
+	
 	delete fft;
-	//ofSoundStreamClose();
 }
 
 
@@ -25,6 +27,10 @@ void AudioAnalyzer::setup(){
 
 
 	bufferSize = NUM_BANDS;
+	numAvgBands = 64;
+	peakFadeVal = .05;
+	peakThreshold = .1;
+
 	
 	fft = ofxFft::create(bufferSize, OF_FFT_WINDOW_BARTLETT);
 	
@@ -33,22 +39,24 @@ void AudioAnalyzer::setup(){
 	eqFunction	= new float[fft->getBinSize()];
 	eqOutput	= new float[fft->getBinSize()];
 	ifftOutput	= new float[bufferSize];
+	blendfft	= new float[bufferSize];
+	avgBands	= new float[numAvgBands];
 	
 	bufferCounter = 0;
 	
 	// this describes a linear low pass filter
 	for(int i = 0; i < fft->getBinSize(); i++)
-		eqFunction[i] = .1*powf((float)i,1.1);//(float) (fft->getBinSize() - i) / (float) fft->getBinSize();
+		eqFunction[i] = .25*powf((float)i,1.1);
+		
+	//(float) (fft->getBinSize() - i) / (float) fft->getBinSize();
 	//eqFunction[i] = (float) (fft->getBinSize() - i) / (float) fft->getBinSize();
-
 	
 	aubio.setup();
 	
 	stats_pitch.setup(100,0,5000);
 
 	bSetup = true;
-
-	cout << "buffersize " << bufferSize << " binsize" << fft->getBinSize() << endl;
+	
 }
 
 
@@ -67,7 +75,9 @@ void AudioAnalyzer::update(){
 	fft->clampSignal();
 	memcpy(ifftOutput, fft->getSignal(), sizeof(float) * fft->getSignalSize());
 	
-	
+	for(int i = 0; i < bufferSize; i++)
+		blendfft[i] = .9*blendfft[i] + .1*ifftOutput[i];
+		
 	aubio.processAudio(audioInput, NUM_BANDS);
 	
 	averageVal = aubio.amplitude;
@@ -75,23 +85,9 @@ void AudioAnalyzer::update(){
 		
 	stats_pitch.update(aubio.pitch);
 	
-	/*
-	// normalize values using the max
-	int binSize = fft->getBinSize();
-	float * amps = fft->getAmplitude();
+	calculateAverageFFTBands( eqOutput, fft->getBinSize() );
 	
-	for(int i=0; i<binSize; i++){
-		if( amps[i] > maxVal ) maxVal = amps[i];
-	}
-	
-	for(int i=0; i<binSize; i++){
-		normalizedValues[i] = amps[i];// / maxVal;
-		averageVal += fabs(audioInput[i]);//normalizedValues[i];		
-	}
-	
-	// calculate the average value
-	averageVal /= (float)binSize;*/
-	
+	updatePeaks(peakThreshold, eqOutput, fft->getBinSize());
 	
 }
 
@@ -113,6 +109,7 @@ void AudioAnalyzer::draw(){
 	ofDrawBitmapString("FFT Output", 0, 0);
 	plot(fftOutput, fft->getBinSize(), -plotHeight, plotHeight / 2);
 	
+	
 	ofSetColor(255,0,0,200);
 	ofLine(0,-averageVal*plotHeight+plotHeight,fft->getBinSize(),-averageVal*plotHeight+plotHeight);
 	ofSetColor(255,255,255,255);
@@ -120,72 +117,32 @@ void AudioAnalyzer::draw(){
 	ofPushMatrix();
 		glTranslatef(fft->getBinSize(), 0, 0);
 		ofDrawBitmapString("EQd FFT Output", 0, 0);
+		plotPeaks(fft->getBinSize(), -plotHeight, plotHeight / 2);//plot(avgBands, numAvgBands-1,-plotHeight, plotHeight / 2);
 		plot(eqOutput, fft->getBinSize(), -plotHeight, plotHeight / 2);
+		
+		glPushMatrix();
+			glTranslatef(0, plotHeight / 2 + (plotHeight / 2), 0);
+			ofBeginShape();
+				for (int i = 0; i < numAvgBands; i++)
+					ofVertex(i * 2, avgBands[i] * (-plotHeight));
+			ofEndShape();
+		glPopMatrix();
+	
 	ofPopMatrix();
 	
 	glTranslatef(0, plotHeight + 16, 0);
 	ofDrawBitmapString("IFFT Output", 0, 0);
 	plot(ifftOutput, fft->getSignalSize(), plotHeight / 2, 0);
 	
+	glTranslatef(0, plotHeight + 16, 0);
+	ofDrawBitmapString("Blend FFT Output", 0, 0);
+	plot(blendfft, fft->getSignalSize(), plotHeight / 2, 0);	
 	ofPopMatrix();
 	
 	ofDrawBitmapString( "pitch is : " + ofToString((int)aubio.pitch) + "\namplitude is : " + ofToString(aubio.amplitude,3), 10,600);
 
 	stats_pitch.draw(16,460,100,100,10);
 	
-	//---- draw audio analysis
-	/*ofFill();
-	
-	// draw the left input:
-	ofSetColor(0x333333);
-	glPushMatrix();
-	glTranslatef(10,10,0);
-	ofRect(0,0,256,200);
-	ofSetColor(0xFFFFFF);
-	for (int i = 0; i < 256; i++)
-		ofLine(i,100,i,100+left[i]*100.0f);
-	glPopMatrix();
-	
-	
-	// draw the right input:
-	ofSetColor(0x333333);
-	glPushMatrix();
-		glTranslatef(276,10,0);
-		ofRect(0,0,256,200);
-		ofSetColor(0xFFFFFF);
-		for (int i = 0; i < 256; i++)
-			ofLine(i,100,i,100+right[i]*100.0f);
-	glPopMatrix();
-	
-	
-	// fft analysis
-	ofSetColor(255,255,255,255);
-	fft->draw(10, 230, fft->getSignalSize(), 200);
-	
-	ofSetColor(255,0,0, 100);
-	ofLine(10,430-(averageVal*400),NUM_BANDS+10,430-(averageVal*400));
-	
-	ofSetColor(255,255,0, 100);
-	ofLine(10,430-(aubio.amplitude*400),NUM_BANDS+10,430-(aubio.amplitude*400));
-	
-	//ofDrawBitmapString( "pitch is : " + ofToString((int)aubio.pitch) + "\namplitude is : " + ofToString(aubio.amplitude,3), 10,500);
-
-	return;
-	
-	glPushMatrix();
-		glTranslatef(10,230,0);
-	
-		ofSetColor(0x333333);
-		ofRect(-1,-1,258,102);
-	
-		ofSetColor(255,0,0, 100);
-		ofLine(0,100-(100*averageVal),NUM_BANDS,100-(100*averageVal));
-	
-		ofSetColor(0xFFFFFF);
-		for(int i=0; i<NUM_BANDS; i++)
-			ofLine(i,100,i,100-normalizedValues[i]*100.0f);
-		
-	glPopMatrix();*/
 }
 
 void AudioAnalyzer::plot(float* array, int length, float scale, float offset)
@@ -209,3 +166,104 @@ void AudioAnalyzer::plot(float* array, int length, float scale, float offset)
 		ofEndShape();
 	glPopMatrix();
 }
+
+void AudioAnalyzer::plotPeaks(int length, float scale, float offset)
+{
+	if(peakFades.size() <= 0) return;
+	
+	float plotHeight = 128;
+	int nPeaks = (int)( peakFades.size() );
+	int psize = (int)(length / (float)nPeaks);
+	
+	ofFill();
+	ofSetColor(0,0,0,200);
+	//ofRect(0, 0, length, plotHeight);
+	
+	ofSetColor(255,255,255,255);
+	
+	ofNoFill();
+	//ofRect(0, 0, length, plotHeight);
+	
+	ofFill();
+	glPushMatrix();
+		glTranslatef(0, plotHeight / 2 + offset, 0);
+			for (int i = 0; i < nPeaks; i++)
+			{
+				ofSetColor(255, 0, 0, 255*(peakFades[i]*2));
+				ofRect(i*psize, 0, psize-1, scale);
+			}
+	glPopMatrix();
+}
+
+void AudioAnalyzer::calculateAverageFFTBands(float * vals, int totalVals)
+{
+	
+	for( int i = 0; i < numAvgBands; i++)
+	{
+		
+		float average = 0;
+		
+		for( int j = i; j < (i+numAvgBands); j++)
+		{
+			if(j < totalVals) average += vals[j];
+		}
+		
+		average /= (float)numAvgBands;
+		avgBands[i] = average;
+		
+	}
+	
+}
+
+
+void AudioAnalyzer::updatePeaks( float threshold, float * vals, int numVals )
+{
+	if( peakFades.size() < numAvgBands)
+	{
+		peakFades.clear();
+		for( int i = 0; i < numAvgBands; i++)
+		{
+			peakFades.push_back(0);
+		}
+	}
+	
+	float averageForVals = 0;
+	for( int i = 0; i < numVals; i++)
+	{
+		averageForVals+= vals[i];
+	}
+	averageForVals /= (float)numVals;
+	
+	// find if any of the fft vals are higher than the threshold
+	// if the peak for that field is <= 0, then make a new peak
+	// fade outall peaks
+	for( int i = 0; i < peakFades.size(); i++)
+	{
+		if(peakFades[i] > 0 ) peakFades[i] -= peakFadeVal;
+	}
+	
+	
+	// for each averaged bands
+	for( int i = 0; i < numAvgBands; i++)
+	{
+		if( peakFades[i] > 0 ) continue;
+		
+		float hiVal = 0;
+		for( int j = i; j < numAvgBands; j++)
+		{
+			if( j < numVals )
+			{
+				if( vals[j] > averageForVals+threshold && vals[j] > hiVal)
+				//if( vals[j] > (avgBands[i]*threshold) && vals[j] > hiVal)
+					hiVal = vals[j];
+			}
+		} 
+		
+		if( hiVal > 0 ) peakFades[i] = 1;
+	}
+	
+	
+	
+	
+}
+
