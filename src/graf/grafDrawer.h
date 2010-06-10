@@ -20,6 +20,7 @@ class grafDrawer
 		void transitionDeform( float dt, float pct, float * amps, int numAmps  );
 		void transitionLineWidth( float dt, float avg );
 		void transitionBounce( float dt, float avg );
+		void transitionFlatten( float zDepth, float timeToDoIt );
 		void resetTransitions();
 		
 		void average( float pct );
@@ -39,6 +40,8 @@ class grafDrawer
 	
 		float pctTransLine;	// pct to make transition with deformed line 
 		float prelimTransTime;	// time to play first transition (deform, amp etc.)
+		float flatTime;
+		
 	//	float prelimTransWait;
 		
     protected:

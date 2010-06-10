@@ -21,15 +21,18 @@ class grafLineDrawer
 		float blendPct;
 		float strokeVal;
 	
-		vector<ofPoint> pts_l;
+		vector<ofPoint> pts_l;	// end points of line
 		vector<ofPoint> pts_r;
 	
 		vector<ofPoint> pts_lo;	// origins so can deform after
 		vector<ofPoint> pts_ro;
 		
 		vector<ofxVec2f> vecs;	// vectors of one end point to other
+		
+		vector<ofPoint> pts_lout;	// endpoints outline
+		vector<ofPoint> pts_rout;
 	
-		vector<float>	alphas;
+		vector<float>	alphas;	// alpha value at each point
 	
 	
 		ofPoint		end_pt_l;
@@ -38,6 +41,8 @@ class grafLineDrawer
 		float		globalAlpha;
 		float		lineScale;
 		bool		bUseFadeInOut;
+		
+		float		outlineDist;	// distance outline is drawn from line (should be very low )
 	
     protected:
 	

@@ -142,7 +142,7 @@ void DropParticles::createRandomDrop( ofPoint startPos, ofPoint vel, float size 
 	ptemp.size = size;
 	///////////////////x
 	particles.push_back(ptemp);
-	cout << "new particle at " << startPos.x << " , " << startPos.y << " , " << startPos.z << endl;
+	//cout << "new particle at " << startPos.x << " , " << startPos.y << " , " << startPos.z << endl;
 	 
 	}
 	

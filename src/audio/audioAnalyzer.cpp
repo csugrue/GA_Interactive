@@ -81,9 +81,8 @@ void AudioAnalyzer::update(){
 	aubio.processAudio(audioInput, NUM_BANDS);
 	
 	averageVal = aubio.amplitude;
-	maxVal	 = 0;
 		
-	stats_pitch.update(aubio.pitch);
+	//stats_pitch.update(aubio.pitch);
 	
 	calculateAverageFFTBands( eqOutput, fft->getBinSize() );
 	
@@ -139,9 +138,9 @@ void AudioAnalyzer::draw(){
 	plot(blendfft, fft->getSignalSize(), plotHeight / 2, 0);	
 	ofPopMatrix();
 	
-	ofDrawBitmapString( "pitch is : " + ofToString((int)aubio.pitch) + "\namplitude is : " + ofToString(aubio.amplitude,3), 10,600);
+	//ofDrawBitmapString( "pitch is : " + ofToString((int)aubio.pitch) + "\namplitude is : " + ofToString(aubio.amplitude,3), 10,600);
 
-	stats_pitch.draw(16,460,100,100,10);
+	//stats_pitch.draw(16,460,100,100,10);
 	
 }
 

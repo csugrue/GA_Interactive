@@ -28,6 +28,7 @@ class grafTagMulti
 		void drawBoundingBox( ofPoint pmin, ofPoint pmax, ofPoint pcenter );
 
 		void setDrawScale( float val ){ drawScale = val; }
+		void applyDrawScale();
 
         // create a new point and add to end of pts vector -- use this for loading tags (following for recording)
         // pt     -normalized position of new point
@@ -76,9 +77,12 @@ class grafTagMulti
 		float				lastX,lastY;
 		bool				bShift;
 		
+		int getNPts(){ return nPts; }
+	
+		
     protected:
 
-
+		int nPts;
 
 
     private:

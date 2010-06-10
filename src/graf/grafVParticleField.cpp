@@ -4,6 +4,7 @@ grafVParticleField::grafVParticleField()
 {
     
     alpha				= 1;
+	xalpha				= 1;
     particle_damping	= .12f;
     particle_size		= 2.f;
     particle_alpha		= .75f;
@@ -30,8 +31,10 @@ void grafVParticleField::reset()
 	
     // reset vars
     alpha = 1;
+	xalpha = 1;
     transitionCounter = 0;
 	numXtras = 1;
+	flatTime = 0;
 }
 
 void grafVParticleField::setup(int w_, int h_)
@@ -53,6 +56,22 @@ void grafVParticleField::setup(int w_, int h_)
 	
 	setDamping( particle_damping);
 	setParticleSize( particle_size );
+}
+
+void grafVParticleField::flatten( float zDepth, float timeToDoIt)
+{
+	if( flatTime == 0 ) 
+		flatTime= ofGetElapsedTimef();
+	
+	float pct = 1 - ((ofGetElapsedTimef()-flatTime) / timeToDoIt);
+
+	for( int j= 0; j< PS.numParticles; j++)
+	{
+		PS.pos[j][2] = pct*PS.pos[j][2]  + (1-pct)*zDepth;
+		PS.stopPos[j][2]  = pct*PS.stopPos[j][2]  + (1-pct)*zDepth;
+		PS.stopVec[j][2]  = pct*PS.stopVec[j][2]  + (1-pct);//*zDepth;
+	}
+	
 }
 
 void grafVParticleField::fall(float dt)
@@ -198,7 +217,7 @@ void grafVParticleField::draw( float zdepth, int screenW, int screenH )
 	
 	for( int i = 0; i <numXtras; i++)
 	{
-		XTRA_PS[i].draw(zdepth, alpha*particle_alpha, particle_size*.75f, false );
+		XTRA_PS[i].draw(zdepth, xalpha*particle_alpha, particle_size*.75f, false );
 	}
 	
 	PS.draw(  zdepth, alpha*particle_alpha, particle_size );

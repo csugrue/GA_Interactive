@@ -31,6 +31,8 @@ grafTagMulti::grafTagMulti()
 	bMouseActive = false;
 	lastX = 0;
 	lastY = 0;
+	
+	nPts = 0;
 }
 
 grafTagMulti::~grafTagMulti()
@@ -52,6 +54,8 @@ void grafTagMulti::clear(bool bAdddInitStroke)
 		myStrokes.push_back(tempStroke);
 	}
 	
+	nPts = 0;
+
 	//rotation.set(0,0,0);
     //position.set(0,0,1);
 }
@@ -163,6 +167,8 @@ bool grafTagMulti::addNewPoint(ofPoint pt, float dist, float angle, float time, 
 	calcMinMax();
 	
 	//-----  
+	nPts++;
+	
 	return true;
 }
 
@@ -284,6 +290,9 @@ grafTagMulti::grafTagMulti( const grafTagMulti &  mom )
 	maxNumPts=mom.maxNumPts;
 	ptStart=mom.ptStart;
 	ptEnd=mom.ptEnd;
+	
+	nPts = mom.nPts;
+
 	
 }
 
@@ -423,6 +432,7 @@ void grafTagMulti::drawBoundingBox( ofPoint pmin, ofPoint pmax, ofPoint pcenter 
 	glVertexPointer(3, GL_FLOAT, 0, pos);
 	glDrawArrays(GL_LINE_LOOP, 0, 4);
 	
+	
 	// back
 	pos[0] = pmin.x;
 	pos[1] = pmax.y;
@@ -488,8 +498,45 @@ void grafTagMulti::drawBoundingBox( ofPoint pmin, ofPoint pmax, ofPoint pcenter 
 	glVertexPointer(3, GL_FLOAT, 0, pos);
 	glDrawArrays(GL_LINE_LOOP, 0, 5);	
 	
+	// center
+	pos[0] = pmin.x;
+	pos[1] = pmax.y;
+	pos[2] = pmin.z+center.z;
+	
+	pos[3] = pmax.x;
+	pos[4] = pmax.y;
+	pos[5] = pmin.z+center.z;
+	
+	pos[6] = pmax.x;
+	pos[7] = pmin.y;
+	pos[8] = pmin.z+center.z;
+	
+	pos[9]  = pmin.x;
+	pos[10] = pmin.y;
+	pos[11] = pmin.z+center.z;
+	
+	glVertexPointer(3, GL_FLOAT, 0, pos);
+	glDrawArrays(GL_LINE_LOOP, 0, 4);
 	
 	glDisable(GL_VERTEX_ARRAY);
 	
 	
+}
+
+void grafTagMulti::applyDrawScale()
+{
+	if( drawScale == 1) return;
+	
+	for( int i = 0; i < myStrokes.size(); i++)
+	{
+		if( myStrokes[i].pts.size() == 0 ) continue;
+		
+		for( int j = 0; j < myStrokes[i].pts.size(); j++)
+		{
+			myStrokes[i].pts[j].pos.x *= drawScale;
+			myStrokes[i].pts[j].pos.y *= drawScale;
+		}
+	}
+	
+	drawScale = 1;
 }

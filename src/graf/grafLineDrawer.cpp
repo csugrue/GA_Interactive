@@ -8,6 +8,7 @@ grafLineDrawer::grafLineDrawer()
 	globalAlpha		= .90f;
 	lineScale		= .05;
 	bUseFadeInOut = true;
+	outlineDist = .0001;
 }
 
 grafLineDrawer::~grafLineDrawer()
@@ -29,6 +30,9 @@ void grafLineDrawer::setup(vector<timePt> pts, float minLen, float maxLen, float
 	
 	pts_lo.clear();
 	pts_ro.clear();
+	
+	pts_lout.clear();
+	pts_rout.clear();
 	
 	alphas.clear();
 		
@@ -52,8 +56,32 @@ void grafLineDrawer::setup(vector<timePt> pts, float minLen, float maxLen, float
 		float deltaA = (i==0) ? fabs( pts[i+1].angle - pts[i].angle ) : fabs( pts[i].angle - pts[i-1].angle );
         if( deltaA > (HALF_PI) && TWO_PI-deltaA > HALF_PI ) bSwap = !bSwap;
 		
-		if( !bSwap ) calculatePoint(pts[i], pts[i].pos.z,len, pts[i].angle, pts_l, pts_r);
-		else calculatePoint(pts[i], pts[i].pos.z,len, pts[i].angle, pts_r, pts_l);
+		//if( !bSwap ) calculatePoint(pts[i], pts[i].pos.z,len, pts[i].angle, pts_l, pts_r);
+		//else calculatePoint(pts[i], pts[i].pos.z,len, pts[i].angle, pts_r, pts_l);
+		//len = MAX(len,.0001);
+		
+		if( !bSwap )
+		{
+			//calculatePoint(pts[i], pts[i].pos.z,len, pts[i].angle, pts_l, pts_r);
+			pts_l.push_back( ofPoint( pts[i].pos.x-( len*sin(pts[i].angle) ),pts[i].pos.y+( len*cos(pts[i].angle) ), pts[i].pos.z) );
+			pts_r.push_back(ofPoint( pts[i].pos.x+( len*sin(pts[i].angle) ),pts[i].pos.y-( len*cos(pts[i].angle) ), pts[i].pos.z) );
+			
+			float oLen = len+outlineDist;
+			pts_lout.push_back( ofPoint( pts[i].pos.x-( oLen*sin(pts[i].angle) ),pts[i].pos.y+( oLen*cos(pts[i].angle) ), pts[i].pos.z) );
+			pts_rout.push_back(ofPoint( pts[i].pos.x+( oLen*sin(pts[i].angle) ),pts[i].pos.y-( oLen*cos(pts[i].angle) ), pts[i].pos.z) );
+			
+		}
+		else 
+		{
+			//calculatePoint(pts[i], pts[i].pos.z,len, pts[i].angle, pts_r, pts_l);
+			pts_r.push_back( ofPoint( pts[i].pos.x-( len*sin(pts[i].angle) ),pts[i].pos.y+( len*cos(pts[i].angle) ), pts[i].pos.z) );
+			pts_l.push_back(ofPoint( pts[i].pos.x+( len*sin(pts[i].angle) ),pts[i].pos.y-( len*cos(pts[i].angle) ), pts[i].pos.z) );
+			
+			float oLen = len+outlineDist;
+			pts_rout.push_back( ofPoint( pts[i].pos.x-( oLen*sin(pts[i].angle) ),pts[i].pos.y+( oLen*cos(pts[i].angle) ), pts[i].pos.z) );
+			pts_lout.push_back(ofPoint( pts[i].pos.x+( oLen*sin(pts[i].angle) ),pts[i].pos.y-( oLen*cos(pts[i].angle) ), pts[i].pos.z) );
+			
+		}
 		
 		float distAlpha = MAX( globalAlpha, ( 1.2* ( 1 - (pts[i].dist/maxLen) ) ) );
 		float fadeAlpha = getAlphaForLinePosition(i,(pts.size()));
@@ -87,6 +115,9 @@ void grafLineDrawer::setupUniform(vector<timePt> pts, float lineDist, int start,
 	pts_lo.clear();
 	pts_ro.clear();
 	
+	pts_lout.clear();
+	pts_rout.clear();
+	
 	alphas.clear();
 	
 	// starting length of 0
@@ -105,8 +136,30 @@ void grafLineDrawer::setupUniform(vector<timePt> pts, float lineDist, int start,
 		float deltaA = (i==0) ? fabs( pts[i+1].angle - pts[i].angle ) : fabs( pts[i].angle - pts[i-1].angle );
         if( deltaA > (HALF_PI) && TWO_PI-deltaA > HALF_PI ) bSwap = !bSwap;
 		
-		if( !bSwap ) calculatePoint(pts[i], pts[i].pos.z,len, pts[i].angle, pts_l, pts_r);
-		else calculatePoint(pts[i], pts[i].pos.z,len, pts[i].angle, pts_r, pts_l);
+		 //len = MAX(len,.0001);
+		 
+		 if( !bSwap )
+		{
+			//calculatePoint(pts[i], pts[i].pos.z,len, pts[i].angle, pts_l, pts_r);
+			pts_l.push_back( ofPoint( pts[i].pos.x-( len*sin(pts[i].angle) ),pts[i].pos.y+( len*cos(pts[i].angle) ), pts[i].pos.z) );
+			pts_r.push_back(ofPoint( pts[i].pos.x+( len*sin(pts[i].angle) ),pts[i].pos.y-( len*cos(pts[i].angle) ), pts[i].pos.z) );
+			
+			float oLen = len+outlineDist;
+			pts_lout.push_back( ofPoint( pts[i].pos.x-( oLen*sin(pts[i].angle) ),pts[i].pos.y+( oLen*cos(pts[i].angle) ), pts[i].pos.z) );
+			pts_rout.push_back(ofPoint( pts[i].pos.x+( oLen*sin(pts[i].angle) ),pts[i].pos.y-( oLen*cos(pts[i].angle) ), pts[i].pos.z) );
+			
+		}
+		else 
+		{
+			//calculatePoint(pts[i], pts[i].pos.z,len, pts[i].angle, pts_r, pts_l);
+			pts_r.push_back( ofPoint( pts[i].pos.x-( len*sin(pts[i].angle) ),pts[i].pos.y+( len*cos(pts[i].angle) ), pts[i].pos.z) );
+			pts_l.push_back(ofPoint( pts[i].pos.x+( len*sin(pts[i].angle) ),pts[i].pos.y-( len*cos(pts[i].angle) ), pts[i].pos.z) );
+			
+			float oLen = len+outlineDist;
+			pts_rout.push_back( ofPoint( pts[i].pos.x-( oLen*sin(pts[i].angle) ),pts[i].pos.y+( oLen*cos(pts[i].angle) ), pts[i].pos.z) );
+			pts_lout.push_back(ofPoint( pts[i].pos.x+( oLen*sin(pts[i].angle) ),pts[i].pos.y-( oLen*cos(pts[i].angle) ), pts[i].pos.z) );
+			
+		}
 		
 		float distAlpha = globalAlpha;//MAX( globalAlpha, ( 1.2* ( 1 - (pts[i].dist/maxLen) ) ) );
 		
@@ -145,6 +198,11 @@ void grafLineDrawer::draw( int lastPoint, float alpha, int startPoint )
 	glEnableClientState(GL_COLOR_ARRAY);
 	
 	//cout << "lastPoint " << lastPoint << endl;
+	float linePoints[6];
+	
+    glLineWidth(2);
+	
+	float colorOut[8] = {0,0,0,1,0,0,0,1};
 	
 	for(int i = startPoint; i < lastPoint; i++)
     {
@@ -152,6 +210,7 @@ void grafLineDrawer::draw( int lastPoint, float alpha, int startPoint )
 		float gVal = strokeVal*alpha;
 		
         float color[4*4];
+		
 		float points[3*4];
 		
 		int		ar  = 0;
@@ -195,6 +254,37 @@ void grafLineDrawer::draw( int lastPoint, float alpha, int startPoint )
 		glColorPointer( 4, GL_FLOAT, 0, color);
 		
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+		
+		linePoints[0] = pts_lout[i-1].x;
+        linePoints[1] = pts_lout[i-1].y;
+        linePoints[2] = pts_lout[i-1].z;
+		
+        linePoints[3] = pts_lout[i].x;
+        linePoints[4] = pts_lout[i].y;
+        linePoints[5] = pts_lout[i].z;
+		
+		float pct = alphas[i];
+		colorOut[3] = .9*alpha*powf(pct,1.5);
+		colorOut[7] = .9*alpha*powf(pct,1.5);
+		
+		glColorPointer( 4, GL_FLOAT, 0, colorOut);
+		glVertexPointer(3, GL_FLOAT, 0, &linePoints[0]);
+        glDrawArrays(GL_LINES, 0, 2);
+		
+		linePoints[0] = pts_rout[i-1].x;
+        linePoints[1] = pts_rout[i-1].y;
+        linePoints[2] = pts_lout[i-1].z;
+		
+        linePoints[3] = pts_rout[i].x;
+        linePoints[4] = pts_rout[i].y;
+        linePoints[5] = pts_rout[i].z;
+		
+		//pct = alphas[i];
+       // glColor4f(0,0,0,.9*alpha*powf(pct,1.5));
+		
+        glColorPointer( 4, GL_FLOAT, 0, colorOut);
+		glVertexPointer(3, GL_FLOAT, 0, &linePoints[0]);
+        glDrawArrays(GL_LINES, 0, 2);
 
     }
 	

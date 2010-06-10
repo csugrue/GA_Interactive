@@ -34,6 +34,7 @@ class particleSystem
         float	col[MAX_PARTICLES][4];
         float   ori[MAX_PARTICLES][3];
         bool    bOn[MAX_PARTICLES];
+		bool    bDrawOn[MAX_PARTICLES];
 		int    framesOn[MAX_PARTICLES];
 		float    stopPos[MAX_PARTICLES][3];
         float    stopVec[MAX_PARTICLES][3];

@@ -39,6 +39,8 @@ void grafCurveSmoother::smoothTag( int resolution, grafTagMulti * src )
 		src->myStrokes.push_back( tempTag.myStrokes[i]);
 		//smoothStroke( resolution, &src->myStrokes[i] );
 	}
+	
+	
 }
 
 

@@ -17,7 +17,8 @@ class grafVParticleField
 	
 		void update( ofPoint pt, ofPoint vel, float dt, bool bReset);
 		void fall( float dt);
-	
+		void flatten(float zDepth, float timeToDoIt);
+		
 		void setDamping( float val );
 		void setParticleSize( float val );
 	
@@ -28,7 +29,7 @@ class grafVParticleField
 		void updateDampingFromAudio(float val);
 		void updateParticleAmpli(float * vals, float averageVal, int tVals, float maxScale = 4.f);
 		
-		float alpha;
+		float alpha, xalpha;
 		float particle_damping;
 		float particle_size;
 		float particle_alpha;
@@ -58,6 +59,7 @@ class grafVParticleField
 		vectorField     VF;
 	
 		int transitionCounter;
+		float flatTime;
       
     private:
 };

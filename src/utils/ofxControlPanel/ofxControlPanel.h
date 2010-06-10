@@ -126,7 +126,8 @@ class ofxControlPanel: public guiBaseObject{
 		bool restoreDown;
 		bool bDraggable;
 		bool bMouseInPanel;
-	
+		bool bNewPanelSelected;
+
 		int selectedPanel;
         int currentPanel;
 

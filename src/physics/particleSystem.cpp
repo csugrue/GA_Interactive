@@ -14,6 +14,7 @@ particleSystem::particleSystem()
 	memset(framesOn,0, sizeof(int)*MAX_PARTICLES);
 	memset(stopPos,0, sizeof(float)*MAX_PARTICLES*3);
 	memset(stopVec,0, sizeof(float)*MAX_PARTICLES*3);
+    memset(bDrawOn, 1, sizeof(bool)*MAX_PARTICLES);
 
 
     
@@ -68,6 +69,7 @@ void particleSystem::reset(int fw, int fh)
 				
 				sizes[p] = psize;
 				framesOn[p] = 0;
+				bDrawOn[p] = true;
             }
 
 		}
@@ -241,7 +243,9 @@ void particleSystem::draw(float time, float alpha, float size,  bool bDrawLines)
 
         for (int i = 0; i < numParticles; i++)
 		{
-		    if(framesOn[i] <= 0) continue;
+		    //if(bDrawOn[i])
+			
+			if(framesOn[i] <= 0 || !bDrawOn[i]) continue;
 
 		    linePoints[0][0] = pos[i][0];
             linePoints[0][1] = pos[i][1];
@@ -271,20 +275,6 @@ void particleSystem::draw(float time, float alpha, float size,  bool bDrawLines)
     }
 
 
-
-   /* glPointSize(3);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-
-    glVertexPointer(3, GL_FLOAT, 0, pos);
-    glColorPointer(4, GL_FLOAT, 0, col);
-
-    glDrawArrays(GL_POINTS, 0, numParticles);
-
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);*/
-
 	float rectPoints[12];
 	int w = 1;//size;
 	int h = 1;//size;
@@ -299,7 +289,7 @@ void particleSystem::draw(float time, float alpha, float size,  bool bDrawLines)
 
 	for (int i = 0; i < numParticles; i++)
 	{
-		if(col[i][3] <= 0 ) continue;
+		if(col[i][3] <= 0 || !bDrawOn[i] ) continue;
 		
 		rectPoints[0] = pos[i][0]-(w*sizes[i])*.5;
 		rectPoints[1] = pos[i][1]-(w*sizes[i])*.5;

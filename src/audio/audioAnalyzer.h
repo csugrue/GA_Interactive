@@ -57,5 +57,7 @@ class AudioAnalyzer{
 		float peakThreshold;
 		void updatePeaks(float threshold, float * vals, int numVals );
 		void plotPeaks( int length, float scale, float offset);
+		
+		ofSoundPlayer music;
 };
 

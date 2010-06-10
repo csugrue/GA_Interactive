@@ -10,7 +10,7 @@ grafDrawer::grafDrawer()
 	lineScale = .05;
 	bSetupDrawer = false;
 	pctTransLine = .001;
-	
+	flatTime = 0;
 }
 
 grafDrawer::~grafDrawer()
@@ -43,8 +43,7 @@ void grafDrawer::setup(grafTagMulti * myTag, float maxLen )
 	{
 		lines[i]->globalAlpha = lineAlpha;
 		lines[i]->lineScale = lineScale;
-		lines[i]->setup( myTag->myStrokes[i].pts, minLen, maxLen, .5f);
-		
+		lines[i]->setup( myTag->myStrokes[i].pts, minLen, maxLen, .5f);		
 	}
 	
 	bSetupDrawer = false;
@@ -78,7 +77,7 @@ void grafDrawer::setLineScale(float val)
 void grafDrawer::transition( float dt, float pct )
 {
 	average(pct);
-	alpha -= .35*dt;
+	//alpha -= .35*dt;
 }
 
 
@@ -97,6 +96,8 @@ void grafDrawer::transitionDeform( float dt, float pct, float * amps, int numAmp
 			
 			lines[i]->pts_l[j].y = pctMe*lines[i]->pts_l[j].y+pctLn*(lines[i]->pts_lo[j].y+bandH);//.9*lines[i]->pts_l[j].y+.1*bandH;
 			lines[i]->pts_r[j].y = pctMe*lines[i]->pts_r[j].y+pctLn*(lines[i]->pts_ro[j].y+bandH);//.9*lines[i]->pts_r[j].y+.1*bandH;
+			lines[i]->pts_lout[j].y = pctMe*lines[i]->pts_lout[j].y+pctLn*(lines[i]->pts_lo[j].y+bandH);//.9*lines[i]->pts_l[j].y+.1*bandH;
+			lines[i]->pts_rout[j].y = pctMe*lines[i]->pts_rout[j].y+pctLn*(lines[i]->pts_ro[j].y+bandH);//.9*lines[i]->pts_r[j].y+.1*bandH;
 			
 		}
 		
@@ -121,6 +122,13 @@ void grafDrawer::transitionLineWidth( float dt, float avg )
 			
 			lines[i]->pts_r[j].x = pctMe*lines[i]->pts_r[j].x+pctLn*(lines[i]->pts_ro[j].x+avg*lines[i]->vecs[j].x);
 			lines[i]->pts_r[j].y = pctMe*lines[i]->pts_r[j].y+pctLn*(lines[i]->pts_ro[j].y+avg*lines[i]->vecs[j].y);
+		
+			lines[i]->pts_lout[j].x = pctMe*lines[i]->pts_lout[j].x+pctLn*(lines[i]->pts_lo[j].x+avg*-lines[i]->vecs[j].x);
+			lines[i]->pts_lout[j].y = pctMe*lines[i]->pts_lout[j].y+pctLn*(lines[i]->pts_lo[j].y+avg*-lines[i]->vecs[j].y);
+			
+			lines[i]->pts_rout[j].x = pctMe*lines[i]->pts_rout[j].x+pctLn*(lines[i]->pts_ro[j].x+avg*lines[i]->vecs[j].x);
+			lines[i]->pts_rout[j].y = pctMe*lines[i]->pts_rout[j].y+pctLn*(lines[i]->pts_ro[j].y+avg*lines[i]->vecs[j].y);
+			
 		}
 		
 	}
@@ -142,6 +150,9 @@ void grafDrawer::transitionBounce( float dt, float avg )
 		{			
 			lines[i]->pts_l[j].y = pctMe*lines[i]->pts_l[j].y+pctLn*(lines[i]->pts_lo[j].y+avg);
 			lines[i]->pts_r[j].y = pctMe*lines[i]->pts_r[j].y+pctLn*(lines[i]->pts_ro[j].y+avg);
+			
+			lines[i]->pts_lout[j].y = pctMe*lines[i]->pts_lout[j].y+pctLn*(lines[i]->pts_lo[j].y+avg);
+			lines[i]->pts_rout[j].y = pctMe*lines[i]->pts_rout[j].y+pctLn*(lines[i]->pts_ro[j].y+avg);
 		}
 		
 	}
@@ -151,10 +162,31 @@ void grafDrawer::transitionBounce( float dt, float avg )
 	
 }
 
+void grafDrawer::transitionFlatten(  float zDepth, float timeToDoIt  )
+{
+	if( flatTime == 0 )
+		flatTime = ofGetElapsedTimef();
+		
+	float pct = 1 - ((ofGetElapsedTimef()-flatTime) / timeToDoIt);
+	
+	for( int i = 0; i < lines.size(); i++)
+	{
+		for( int j = 0; j < lines[i]->pts_l.size(); j++)
+		{
+			lines[i]->pts_l[j].z	= pct*lines[i]->pts_l[j].z		+ (1-pct)*zDepth;
+			lines[i]->pts_r[j].z	= pct*lines[i]->pts_r[j].z		+ (1-pct)*zDepth;
+			lines[i]->pts_lout[j].z = pct*lines[i]->pts_lout[j].z	+ (1-pct)*zDepth;
+			lines[i]->pts_rout[j].z = pct*lines[i]->pts_rout[j].z	+ (1-pct)*zDepth;
+		}
+	}
+
+}
+
 void grafDrawer::resetTransitions()
 {
-pctTransLine=.001;
-prelimTransTime = 0;
+	pctTransLine	=.001;
+	prelimTransTime = 0;
+	flatTime		= 0;
 }
 
 void grafDrawer::average( float pct )
@@ -173,8 +205,8 @@ void grafDrawer::draw( int lastStroke, int lastPoint)
 		if( i < lastStroke )		lines[i]->draw(-1,alpha);
 		else if( i == lastStroke )	lines[i]->draw(lastPoint,alpha);
 		
-		if( i < lastStroke )		lines[i]->drawOutline(-1,alpha,lineWidth);
-		else if( i == lastStroke )	lines[i]->drawOutline(lastPoint,alpha,lineWidth);
+		//if( i < lastStroke )		lines[i]->drawOutline(-1,alpha,lineWidth);
+		//else if( i == lastStroke )	lines[i]->drawOutline(lastPoint,alpha,lineWidth);
 	}
 	
 	glDisable( GL_DEPTH_TEST );

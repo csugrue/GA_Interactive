@@ -4,7 +4,7 @@
 //--------------------------------------------------------------
 void testApp::setup(){
 	
-	ofSetFrameRate(60);
+	ofSetFrameRate(30);
 	
 	ofBackground(0,0,0);
 	
@@ -61,6 +61,7 @@ void testApp::keyPressed(int key){
 		{
 			if(bRecordingMovie) movieSaver.finishMovie();
 			bRecordingMovie = !bRecordingMovie;
+			if(bRecordingMovie) grafAudioPlayerApp.audio.music.play();
 		}
 	}
 	
@@ -70,7 +71,10 @@ void testApp::keyPressed(int key){
 		if(bUseRecorder)
 		{
 			ofSetWindowShape(645, 485);
+		}else{
+			ofSetWindowShape(1024, 768);
 		}
+		
 		
 	}else if( key == 'f' || key == 'F' )
 		ofToggleFullscreen();

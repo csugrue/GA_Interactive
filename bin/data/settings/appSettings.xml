@@ -2,7 +2,7 @@
     <val_0>1.000000</val_0>
 </PLAY>
 <ROTATE>
-    <val_0>1.000000</val_0>
+    <val_0>0.000000</val_0>
 </ROTATE>
 <SHOW_NAME>
     <val_0>1.000000</val_0>
@@ -14,7 +14,7 @@
     <val_0>0.000000</val_0>
 </FULL_SCREEN>
 <LINE_ALPHA>
-    <val_0>0.944444</val_0>
+    <val_0>0.966667</val_0>
 </LINE_ALPHA>
 <LINE_WIDTH>
     <val_0>2.000000</val_0>
@@ -23,7 +23,7 @@
     <val_0>4.055555</val_0>
 </P_SIZE>
 <P_ALPHA>
-    <val_0>0.750000</val_0>
+    <val_0>0.838889</val_0>
 </P_ALPHA>
 <P_DAMP>
     <val_0>0.150000</val_0>
@@ -83,7 +83,7 @@
     <val_0>0.000000</val_0>
 </line_width_force>
 <wait_time>
-    <val_0>14.666667</val_0>
+    <val_0>0.000000</val_0>
 </wait_time>
 <use_wave_deform>
     <val_0>1.000000</val_0>
@@ -100,3 +100,21 @@
 <bounce_force>
     <val_0>0.533333</val_0>
 </bounce_force>
+<show_drawing_tool>
+    <val_0>0.000000</val_0>
+</show_drawing_tool>
+<new_structure>
+    <val_0>0.000000</val_0>
+</new_structure>
+<arch_done>
+    <val_0>0.000000</val_0>
+</arch_done>
+<arch_save>
+    <val_0>0.000000</val_0>
+</arch_save>
+<arch_load>
+    <val_0>0.000000</val_0>
+</arch_load>
+<arch_clear>
+    <val_0>0.000000</val_0>
+</arch_clear>

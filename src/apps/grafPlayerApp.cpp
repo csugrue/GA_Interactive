@@ -16,6 +16,7 @@ GrafPlayerApp::~GrafPlayerApp(){
 	ofRemoveListener(ofEvents.keyReleased, this, &GrafPlayerApp::keyReleased);
 
 }
+
 //--------------------------------------------------------------
 void GrafPlayerApp::setup(){
 
@@ -39,8 +40,10 @@ void GrafPlayerApp::setup(){
 	bUseMask		= true;
 	bTakeScreenShot = false;
 	bUseGravity		= true;
-	prevStroke		= 0;
+	bUseAudio		= true;
+	bUseArchitecture= true;
 	
+	prevStroke		= 0;
 	currentTagID	= 0;
 	waitTime		= 2.f;
 	waitTimer		= waitTime;
@@ -65,19 +68,29 @@ void GrafPlayerApp::setup(){
 	xml.loadFile("data/settings/directorySettings");
 	myTagDirectory = xml.getValue("directory", TAG_DIRECTORY);
 	
-	setupContolPanel();
-	updateConrolPanel();
+	// controls
+	setupControlPanel();
+	updateControlPanel();
 	
+	// load tgs
 	preLoadTags();
 	particleDrawer.setup(screenW,screenH);
 	
 	
-	audio.setup();
+	// audio
+	if(bUseAudio) audio.setup();
 	
-	//drops.setup(30);
+	// interactive architecture setup
+	if(bUseArchitecture)
+	{
+		archPhysics.setup();
+	}
 	
 	// temp
-	panel.setSelectedPanel("Audio Settings");
+	panel.setSelectedPanel("Architecture Settings");
+	
+	// fbo
+	fbo.allocate(FBO_W,FBO_H );
 
 }
 
@@ -99,7 +112,6 @@ void GrafPlayerApp::update(){
 	else if( mode == PLAY_MODE_PLAY && tags.size() > 0 )
 	{
 		
-		
 		//---- set drawing data for render
 		if( drawer.bSetupDrawer )
 			drawer.setup( &tags[currentTagID], tags[currentTagID].distMax );
@@ -107,102 +119,36 @@ void GrafPlayerApp::update(){
 		//---- update tag playing state
 		if( !myTagPlayer.bDonePlaying )					
 		{
-			// normal play, update tag
-			myTagPlayer.update(&tags[currentTagID]);
+			myTagPlayer.update(&tags[currentTagID]);	// normal play, update tag
 		
 		}else if( !myTagPlayer.bPaused && myTagPlayer.bDonePlaying && waitTimer > 0)			   
 		{
-			// pause time after drawn, before fades out
-			waitTimer -= dt;
+			waitTimer -= dt;	// pause time after drawn, before fades out
 		}
 		else if ( !myTagPlayer.bPaused && myTagPlayer.bDonePlaying && (drawer.alpha > 0 || particleDrawer.alpha > 0))			  		
 		{
-						
-			//---- TRANSITIONS
-			// fade away, dissolve, deform etc.
-			
-			float deform_frc = panel.getValueF("wave_deform_force");
-			float line_amp_frc = panel.getValueF("line_width_force");
-			float bounce_frc = panel.getValueF("bounce_force");
-			
-			if( panel.getValueB("use_wave_deform") ) drawer.transitionDeform( dt,deform_frc, audio.audioInput, NUM_BANDS);
-			if( panel.getValueB("use_line_width") ) drawer.transitionLineWidth( dt,audio.averageVal*line_amp_frc);
-			if( panel.getValueB("use_bounce") ) drawer.transitionBounce( dt,audio.averageVal*bounce_frc);
-			if( drawer.pctTransLine < .1 ) drawer.pctTransLine += .001;
-			drawer.prelimTransTime += dt;
-			
-			if(drawer.prelimTransTime > panel.getValueI("wait_time") )
-			{
-				bTrans = true;
-				
-				// do average transition
-				drawer.transition(dt,.015);
-				
-				if( bUseGravity ) 
-					particleDrawer.fall(dt);
-			
-				if(particleDrawer.alpha  > 0 ) particleDrawer.alpha -= .5*dt;
-			}
-			
+			updateTransition(0);
 		}
 		else if (  !myTagPlayer.bPaused && myTagPlayer.bDonePlaying )							
 		{
-			// setup for next tag
-			resetPlayer(1);
+			resetPlayer(1);	// setup for next tag
 		}
 	
 		
-		//---- update the particle field
-		int lastStroke = myTagPlayer.getCurrentStroke();
-		int lastPoint  = myTagPlayer.getCurrentId();
-		
-		if( prevStroke != lastStroke )	myTagPlayer.bReset = true; 
-		if( lastPoint <= 0 )			myTagPlayer.bReset = true;
-		if( tags[currentTagID].myStrokes[ lastStroke].pts.size()-1 == lastPoint ) myTagPlayer.bReset = true;
-		
-		
-		
 		//---------- AUDIO applied
-		if(panel.getValueB("use_p_size") ) 
-			particleDrawer.updateParticleSizes(audio.eqOutput,audio.averageVal, NUM_BANDS,panel.getValueF("particle_size_force") );
+		if( bUseAudio) updateAudio();
 		
-		particleDrawer.setDamping( panel.getValueF("P_DAMP") );
-		//if(panel.getValueB("use_p_damp") ) 
-		//	particleDrawer.updateDampingFromAudio(panel.getValueF("p_audio_damp")*audio.averageVal*.1);
 		
-		if(!bTrans && panel.getValueB("use_p_amp") ) 
-			particleDrawer.updateParticleAmpli(audio.ifftOutput,audio.averageVal, NUM_BANDS,panel.getValueF("outward_amp_force") );
-		
-		// create drops
-		for( int i = 0; i < audio.peakFades.size(); i++)
-		{
-			if( audio.peakFades[i] == 1 )
-			{
-				int randomP = particleDrawer.PS.getIndexOfRandomAliveParticle();//ofRandom( 0, particleDrawer.PS.numParticles );
-				ofPoint pPos = ofPoint(particleDrawer.PS.pos[randomP][0],particleDrawer.PS.pos[randomP][1],particleDrawer.PS.pos[randomP][2]);
-				ofPoint pVel = ofPoint(particleDrawer.PS.vel[randomP][0],particleDrawer.PS.vel[randomP][1],particleDrawer.PS.vel[randomP][2]);
-				drops.createRandomDrop( pPos, pVel, particleDrawer.PS.sizes[randomP] );
-			}
-		}
-		
-		// update particle drops (audio stuff);
-		drops.update(dt);
-		
-		//---------
-		
+		//--------- ARCHITECTURE
+		if( bUseArchitecture ) updateArchitecture();
 		
 		
 		//--------- PARTICLES
-		particleDrawer.update( myTagPlayer.getCurrentPoint(),myTagPlayer.getVelocityForTime(&tags[currentTagID]),  dt,  myTagPlayer.bReset);
-		myTagPlayer.bReset = false; // important so no particle error on first stroke
-
-		//--------- 
+		updateParticles();
+			
 		
-		
-		prevStroke		= myTagPlayer.getCurrentStroke();		
-		
-		// update rotation
-		if(bRotating) rotationY += panel.getValueF("ROT_SPEED")*dt;
+		//--------- TAG ROTATION + POSITION
+		if(bRotating && !myTagPlayer.bPaused ) rotationY += panel.getValueF("ROT_SPEED")*dt;
 		
 		// update pos / vel
 		tags[currentTagID].position.x += tagPosVel.x;
@@ -210,34 +156,185 @@ void GrafPlayerApp::update(){
 		
 		tagPosVel.x -= .1*tagPosVel.x;
 		tagPosVel.y -= .1*tagPosVel.y;
+
+	}
+	
+	
+	
+	// controls
+	if( bShowPanel ) updateControlPanel();
+	
+	
+}
+
+void GrafPlayerApp::updateParticles()
+{
+	
+	int lastStroke = myTagPlayer.getCurrentStroke();
+	int lastPoint  = myTagPlayer.getCurrentId();
+	
+	if( prevStroke != lastStroke )	myTagPlayer.bReset = true; 
+	if( lastPoint <= 0 )			myTagPlayer.bReset = true;
+	if( tags[currentTagID].myStrokes[ lastStroke].pts.size()-1 == lastPoint ) myTagPlayer.bReset = true;
+	
+	particleDrawer.update( myTagPlayer.getCurrentPoint(),myTagPlayer.getVelocityForTime(&tags[currentTagID]),  dt,  myTagPlayer.bReset);
+	
+	myTagPlayer.bReset = false; // important so no particle error on first stroke
+	prevStroke		= myTagPlayer.getCurrentStroke();	
+}
+
+void GrafPlayerApp::updateTransition( int type)
+{
+	//----------  TRANSITIONS
+	// fade away, dissolve, deform etc.
+	
+	drawer.prelimTransTime += dt;
+	
+	if(bUseAudio)
+	{
+	
+		float deform_frc = panel.getValueF("wave_deform_force");
+		float line_amp_frc = panel.getValueF("line_width_force");
+		float bounce_frc = panel.getValueF("bounce_force");
 		
-		//cout << "rotationY " << rotationY << endl;
-		
+		if( panel.getValueB("use_wave_deform") ) drawer.transitionDeform( dt,deform_frc, audio.audioInput, NUM_BANDS);
+		if( panel.getValueB("use_line_width") ) drawer.transitionLineWidth( dt,audio.averageVal*line_amp_frc);
+		if( panel.getValueB("use_bounce") ) drawer.transitionBounce( dt,audio.averageVal*bounce_frc);
+		if( drawer.pctTransLine < .1 ) drawer.pctTransLine += .001;
 		
 	}
 	
-	if( bShowPanel ) updateConrolPanel();
+	
+	
+	if(bUseArchitecture)
+	{
+	 
+		 if( drawer.prelimTransTime > panel.getValueI("wait_time") )
+		 {
+			
+			bRotating = false;
+			
+			drawer.transitionFlatten( tags[currentTagID].center.z, 50);
+			particleDrawer.flatten( tags[currentTagID].center.z, 52);
+			
+			if(rotFixTime == 0) rotFixTime = ofGetElapsedTimef();
+			float pct = 1 - ((ofGetElapsedTimef()-rotFixTime) / 45.f);
+			rotationY = pct*rotationY + (1-pct)*(0);
+			
+			if( pct < .9 && !archPhysics.bMakingParticles) 
+				archPhysics.turnOnParticleBoxes(&particleDrawer.PS);
+
+			if(particleDrawer.xalpha  > 0 ) particleDrawer.xalpha -= .5*dt;
+			
+			// if all particles have fallen and 
+			if(archPhysics.bMadeAll)
+			{
+				// do average transition
+				//drawer.transition(dt,.99);
+				drawer.alpha -= .1*dt;
+				if(particleDrawer.alpha  > 0 ) particleDrawer.alpha -= .5*dt;
+			}
+			
+			//if( bUseGravity ) particleDrawer.fall(dt);
+			
+		 }
+	
+	}else{
+	
+		// do average transition
+		//drawer.transition(dt,.99);
+		if(!bUseAudio)
+		{
+			drawer.alpha -= .1*dt;
+			drawer.transition(dt,.15);
+			if( bUseGravity ) particleDrawer.fall(dt);
+			if(particleDrawer.alpha  > 0 ) particleDrawer.alpha -= .5*dt;
+		}
+	}
+	
+	//---------- 
+}
+
+void GrafPlayerApp::updateAudio()
+{
+	if(panel.getValueB("use_p_size") ) 
+		particleDrawer.updateParticleSizes(audio.eqOutput,audio.averageVal, NUM_BANDS,panel.getValueF("particle_size_force") );
+	
+	particleDrawer.setDamping( panel.getValueF("P_DAMP") );
+	
+	if( /*drawer.prelimTransTime < panel.getValueI("wait_time")  &&*/ panel.getValueB("use_p_amp") ) 
+		particleDrawer.updateParticleAmpli(audio.ifftOutput,audio.averageVal, NUM_BANDS,panel.getValueF("outward_amp_force") );
+	
+	// create drops
+	for( int i = 0; i < audio.peakFades.size(); i++)
+	{
+		if( audio.peakFades[i] == 1 )
+		{
+			int randomP = particleDrawer.PS.getIndexOfRandomAliveParticle();//ofRandom( 0, particleDrawer.PS.numParticles );
+			ofPoint pPos = ofPoint(particleDrawer.PS.pos[randomP][0],particleDrawer.PS.pos[randomP][1],particleDrawer.PS.pos[randomP][2]);
+			ofPoint pVel = ofPoint(particleDrawer.PS.vel[randomP][0],particleDrawer.PS.vel[randomP][1],particleDrawer.PS.vel[randomP][2]);
+			drops.createRandomDrop( pPos, pVel, particleDrawer.PS.sizes[randomP] );
+		}
+	}
+	
+	// update particle drops (audio stuff);
+	drops.update(dt);
 	
 	// update audio
 	audio.update();
 }
 
+void GrafPlayerApp::updateArchitecture()
+{
+	//if( drawer.prelimTransTime < panel.getValueI("wait_time") && !archPhysics.bMakingParticles)
+	//	archPhysics.turnOnParticleBoxes(&particleDrawer.PS);
+	
+	archPhysics.update(dt);
+	if(archPhysics.bMakingParticles)
+	{
+		archPhysics.createParticleSet(&particleDrawer.PS);
+	}
+	
+}
 
 //--------------------------------------------------------------
 void GrafPlayerApp::draw(){
 
+	screenW = 1024;//ofGetWidth();
+	screenH = 768;//ofGetHeight();
+	
+	
+	
+	// architecture test image
+	if( mode == PLAY_MODE_PLAY )
+	{
+		ofSetColor(150,150,150,255);
+		if(bUseArchitecture)
+			archPhysics.drawTestImage();
+	}
+	
+	
+	
+	//--------- start fbo render
+	fbo.clear();
+	fbo.begin();
+	
 	ofEnableAlphaBlending();
 	ofSetColor(255,255,255,255);
 
 	if( mode == PLAY_MODE_LOAD )
 	{
+		//nothing whi/e loading
 		;
 	}
 	else if( mode == PLAY_MODE_PLAY )
 	{
 	
-		glPushMatrix();
+		//adjust viewport to match position of tag
+		glViewport(tags[currentTagID].position.x,-tags[currentTagID].position.y,fbo.texData.width,fbo.texData.height);
 		
+		
+		glPushMatrix();
 		
 			if( bUseFog )
 			{
@@ -246,14 +343,10 @@ void GrafPlayerApp::draw(){
 				glEnable(GL_FOG);				
 			}
 		
+			//glTranslatef(tags[currentTagID].position.x,tags[currentTagID].position.y,0);
 			glTranslatef(screenW/2, screenH/2, 0);
+			glScalef(tags[currentTagID].position.z,tags[currentTagID].position.z,tags[currentTagID].position.z);//tags[currentTagID].position.z);
 		
-			glScalef(tags[currentTagID].position.z,tags[currentTagID].position.z,tags[currentTagID].position.z);
-		
-			glTranslatef(tags[currentTagID].position.x,tags[currentTagID].position.y,0);
-			
-
-			
 			glPushMatrix();
 		
 				glRotatef(tags[currentTagID].rotation.x,1,0,0);
@@ -264,31 +357,26 @@ void GrafPlayerApp::draw(){
 				glTranslatef(-tags[currentTagID].center.x*tags[currentTagID].drawScale,-tags[currentTagID].center.y*tags[currentTagID].drawScale,-tags[currentTagID].center.z);
 		
 				glDisable(GL_DEPTH_TEST);
-				
+								
+				// draw particles
 				particleDrawer.draw(myTagPlayer.getCurrentPoint().z,  screenW,  screenH);
-				drops.draw();
-				
-				
+								
+				// draw audio particles
+				if( bUseAudio) drops.draw();
 				
 				glEnable(GL_DEPTH_TEST);
 				
-				ofSetColor(255,0,0);
-				glPushMatrix();
-					glScalef( tags[currentTagID].drawScale, tags[currentTagID].drawScale, 1);
-					//drawAudioLine();
-				glPopMatrix();
-	
-				
+				// draw lines
 				glPushMatrix();
 					glScalef( tags[currentTagID].drawScale, tags[currentTagID].drawScale, 1);
 					drawer.draw( myTagPlayer.getCurrentStroke(), myTagPlayer.getCurrentId() );
-					
 				glPopMatrix();
 		
+				// draw bounding box
 				glPushMatrix();
+					ofSetColor(255, 255, 255);
 					glScalef( tags[currentTagID].drawScale, tags[currentTagID].drawScale, 1);
-					
-					//drawer.drawBoundingBox( tags[currentTagID].min, tags[currentTagID].max, tags[currentTagID].center );
+					//tags[currentTagID].drawBoundingBox( tags[currentTagID].min, tags[currentTagID].max, tags[currentTagID].center );
 				glPopMatrix();
 				
 				
@@ -302,12 +390,42 @@ void GrafPlayerApp::draw(){
 		
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_FOG);
-		
-
-	
-	
+			
 	}
 	
+	
+	if(bUseArchitecture)
+	{
+		
+		glViewport(0,0,fbo.texData.width,fbo.texData.height);
+		//
+		// set translation in polygon tool so drwaing happens in correct place
+		archPhysics.offSetPre.x = (tags[currentTagID].position.x);
+		archPhysics.offSetPre.y = (tags[currentTagID].position.y);
+		archPhysics.offSet.x = (-tags[currentTagID].min.x*tags[currentTagID].drawScale) + (-tags[currentTagID].center.x*tags[currentTagID].drawScale);
+		archPhysics.offSet.y = (-tags[currentTagID].min.y*tags[currentTagID].drawScale) + (-tags[currentTagID].center.y*tags[currentTagID].drawScale);
+		archPhysics.scale = tags[currentTagID].position.z;
+		
+		//archPhysics.pGroup.setOffset(ofPoint(offX, offY,0), ofPoint(tags[currentTagID].position.x,tags[currentTagID].position.y,0));
+		
+		
+		
+		glPushMatrix();
+			//glTranslatef(screenW/2, screenH/2, 0);
+			//glTranslatef(-tags[currentTagID].min.x*tags[currentTagID].drawScale,-tags[currentTagID].min.y*tags[currentTagID].drawScale,-tags[currentTagID].min.z);
+			//glTranslatef(-tags[currentTagID].center.x*tags[currentTagID].drawScale,-tags[currentTagID].center.y*tags[currentTagID].drawScale,0);
+			archPhysics.draw();
+			
+			if( archPhysics.bDrawingActive || panel.getValueB("show_drawing_tool") )
+			{
+				archPhysics.drawTool();
+			}
+			
+		glPopMatrix();
+	}
+	
+	
+	// image mask for edges
 	if(bUseMask)
 	{
 		ofEnableAlphaBlending();
@@ -315,7 +433,7 @@ void GrafPlayerApp::draw(){
 		imageMask.draw(0,0,ofGetWidth(),ofGetHeight());
 	}
 	
-	
+	// data
 	if( mode == PLAY_MODE_PLAY )
 	{
 		ofSetColor(255,255,255,255);
@@ -332,19 +450,6 @@ void GrafPlayerApp::draw(){
 	}
 
 
-	ofEnableAlphaBlending();
-	
-	if(bShowPanel){
-		panel.draw();
-		//fontSS.drawString("x: toggle control panel  |  p: pause/play  |  s: screen capture  |  m: toggle mouse  |  f: toggle fullscreen  |  h: toggle home  |  arrows: next/prev  |  esc: quit", 90, ofGetHeight()-50);
-		//fontSS.drawString("left mouse: alter position  |  left+shift mouse: zoom  |  right mouse: rotate y  |  right+shift mouse: rotate x", 220, ofGetHeight()-30);
-		
-		if( panel.getSelectedPanelName() == "Audio Settings" )
-		{
-			audio.draw();
-		}
-		
-	}
 	
 
 	// screenshots
@@ -360,6 +465,28 @@ void GrafPlayerApp::draw(){
 		bTakeScreenShot = false;
 	}
 	
+	//---- end fbo render
+	fbo.end();
+	
+	
+	ofEnableAlphaBlending();
+	
+	//---- draw fbo to screen
+	ofSetColor(255,255,255,250);
+	fbo.draw(0, 0,FBO_W, FBO_H);
+	
+	// control panel
+	if(bShowPanel){
+		panel.draw();
+		//fontSS.drawString("x: toggle control panel  |  p: pause/play  |  s: screen capture  |  m: toggle mouse  |  f: toggle fullscreen  |  h: toggle home  |  arrows: next/prev  |  esc: quit", 90, ofGetHeight()-50);
+		//fontSS.drawString("left mouse: alter position  |  left+shift mouse: zoom  |  right mouse: rotate y  |  right+shift mouse: rotate x", 220, ofGetHeight()-30);
+		
+		if( bUseAudio && panel.getSelectedPanelName() == "Audio Settings" )
+		{
+			audio.draw();
+		}
+		
+	}
 }
 
 
@@ -373,7 +500,7 @@ void GrafPlayerApp::keyPressed (ofKeyEventArgs & event){
   		case 'x': bShowPanel=!bShowPanel; break;
 		case 'p': 
 			myTagPlayer.bPaused = !myTagPlayer.bPaused;
-			bRotating = !myTagPlayer.bPaused;
+			//bRotating = !myTagPlayer.bPaused;
 			panel.setValueB("ROTATE",bRotating);
 			panel.setValueB("PLAY",!myTagPlayer.bPaused);
 			break;
@@ -384,20 +511,30 @@ void GrafPlayerApp::keyPressed (ofKeyEventArgs & event){
 		
 		case 's': bTakeScreenShot = true; break;
 			
-		 
+		case '/': 
+			//archPhysics.setParticleBoxes( &particleDrawer.PS ); 
+			archPhysics.turnOnParticleBoxes(&particleDrawer.PS);
+			break;
+		case '?' : 	
+			cout << "total pts for this tag: " << tags[currentTagID].getNPts() << endl;
+			if(drawer.lines.size() >0)archPhysics.turnOnParticlesForLine(drawer.lines[0]->pts_r);
+			break;
+		case 'R':
+			tags[currentTagID].rotation.set(0,0,0);
+			tags[currentTagID].position.set(0,0,1);
+			rotationY = 0;
+			tagPosVel.set(0,0,0);
+			break;
+		case OF_KEY_RETURN:
+			if( panel.getSelectedPanelName() == "Architecture Drawing" )
+				archPhysics.pGroup.addPoly();
+			break;
 		default:
   			break;
 
   }
 
-	if( event.key == '/')
-	{
-		int randomP = particleDrawer.PS.getIndexOfRandomAliveParticle();//ofRandom( 0, particleDrawer.PS.numParticles );
-		ofPoint pPos = ofPoint(particleDrawer.PS.pos[randomP][0],particleDrawer.PS.pos[randomP][1],particleDrawer.PS.pos[randomP][2]);
-		ofPoint pVel = ofPoint(particleDrawer.PS.vel[randomP][0],particleDrawer.PS.vel[randomP][1],particleDrawer.PS.vel[randomP][2]);
-		drops.createRandomDrop( pPos, pVel, particleDrawer.PS.sizes[randomP] );
-		
-	}
+	
 	
 
 }
@@ -421,7 +558,9 @@ void GrafPlayerApp::mouseDragged(ofMouseEventArgs & event ){
 	{
 		panel.mouseDragged(event.x,event.y,event.button);
 	}
-	else{
+	
+	if( !panel.isMouseInPanel(event.x, event.y) && panel.getSelectedPanelName() != "Architecture Drawing" )
+	{
 		if( event.button == 0 )
 		{
 			if(!bShiftOn)
@@ -436,8 +575,8 @@ void GrafPlayerApp::mouseDragged(ofMouseEventArgs & event ){
 			
 		
 		}else{
-			if( tags.size() > 0 && !bShiftOn) tags[currentTagID].rotation.y += (event.x-lastX);
-			else if( tags.size() > 0 && bShiftOn) tags[currentTagID].rotation.x += (event.y-lastY);
+			if( tags.size() > 0 && !bShiftOn)		tags[currentTagID].rotation.y += (event.x-lastX);
+			else if( tags.size() > 0 && bShiftOn)	tags[currentTagID].rotation.x += (event.y-lastY);
 		}
 	}	
 	
@@ -451,7 +590,15 @@ void GrafPlayerApp::mouseDragged(ofMouseEventArgs & event ){
 void GrafPlayerApp::mousePressed(ofMouseEventArgs & event ){
 
     if( bShowPanel ) panel.mousePressed(event.x,event.y,event.button);
-
+	
+	
+	if(bUseArchitecture)
+	{
+		if( panel.isMouseInPanel(event.x, event.y) ) archPhysics.pGroup.disableAll(true);
+		else if( panel.getSelectedPanelName() == "Architecture Drawing") archPhysics.pGroup.reEnableLast();
+	}
+	
+	
 }
 
 //--------------------------------------------------------------
@@ -504,6 +651,11 @@ void GrafPlayerApp::nextTag(int dir)
 	}
 		
 	drawer.resetTransitions();
+	rotFixTime = 0;
+	archPhysics.reset();
+	
+	cout << "total pts this tag " << tags[currentTagID].getNPts() << endl;
+	
 }
 //--------------------------------------------------------------
 void GrafPlayerApp::loadTags()
@@ -516,9 +668,13 @@ void GrafPlayerApp::loadTags()
 		gIO.loadTag( filesToLoad[ toLoad ], &tags[ toLoad ]);
 		tags[ toLoad ].tagname = filenames[ toLoad ];
 		
+		
 		smoother.smoothTag(4, &tags[ toLoad ]);
 		tags[toLoad].average();
 		tags[toLoad].average();
+		
+		
+		
 	}
 	else{
 		mode = PLAY_MODE_PLAY;
@@ -570,14 +726,17 @@ void GrafPlayerApp::preLoadTags()
 	totalToLoad = filesToLoad.size();
 }
 //--------------------------------------------------------------
-void GrafPlayerApp::setupContolPanel()
+void GrafPlayerApp::setupControlPanel()
 {
 	
 	panel.setup("GA 2.0: Audio", ofGetWidth()-320, 20, 300, 700);
 	panel.addPanel("App Settings", 1, false);
 	panel.addPanel("Draw Settings", 1, false);
 	panel.addPanel("Audio Settings", 1, false);
-	
+	panel.addPanel("Architecture Drawing", 1, false);
+	panel.addPanel("Architecture Settings", 1, false);
+	panel.addPanel("App Modes", 1, false);
+
 	//---- application sttings
 	panel.setWhichPanel("App Settings");
 	panel.addToggle("Play / Pause", "PLAY", true);
@@ -608,7 +767,8 @@ void GrafPlayerApp::setupContolPanel()
 	names_audio_options.push_back("line in");
 	names_audio_options.push_back("music file");
 	panel.addMultiToggle("audio input:", "audio_input", 1, names_audio_options);
-	panel.addToggle("open sound file", "open_sound_file", false);*/
+	*/
+	panel.addToggle("open sound file", "open_sound_file", false);
 	panel.addSlider("outward amp force","outward_amp_force",8,0,200,false);
 	panel.addSlider("particle size force","particle_size_force",22,0,200,false);
 	panel.addSlider("wave deform force","wave_deform_force",.25,0,2,false);
@@ -627,12 +787,28 @@ void GrafPlayerApp::setupContolPanel()
 	panel.addToggle("use line width amp", "use_line_width", false);
 	panel.addToggle("use bounce", "use_bounce", true);
 	
+	panel.setWhichPanel("Architecture Settings");
+	panel.addToggle("show drawing tool", "show_drawing_tool",false);
+	
+	panel.setWhichPanel("Architecture Drawing");
+	panel.addToggle("new structure", "new_structure",false);
+	panel.addToggle("done","arch_done",false);
+	panel.addToggle("save xml", "arch_save", false);
+	panel.addToggle("load xml", "arch_load", false);
+	panel.addToggle("clear", "arch_clear", false);
+	
+	panel.setWhichPanel("App Modes");
+	panel.addToggle("use audio", "use_audio",true);
+	panel.addToggle("use architecture", "use_arch",true);
+
 	//--- load saved
 	panel.loadSettings("settings/appSettings.xml");
+	
+	panel.update();
 }
 
 //--------------------------------------------------------------
-void GrafPlayerApp::updateConrolPanel()
+void GrafPlayerApp::updateControlPanel()
 {
 	panel.update();
 	
@@ -669,7 +845,7 @@ void GrafPlayerApp::updateConrolPanel()
 	if(panel.getSelectedPanelName() == "Audio Settings" )
 	{
 	
-			/*if( panel.getValueB("open_sound_file") )
+			if( panel.getValueB("open_sound_file") )
 			{
 					panel.setValueB("open_sound_file", false); 
 					
@@ -677,8 +853,6 @@ void GrafPlayerApp::updateConrolPanel()
 					char msg2[] = {""};
 					
 					string result = dialog.getStringFromDialog(kDialogFile, msg, msg2);
-					
-					
 					resultString.clear();
 					resultString.push_back("attempting to load "+result);
 					
@@ -694,16 +868,62 @@ void GrafPlayerApp::updateConrolPanel()
 							string currentFilename = paths.back();
 							cout << "load: " << currentFilename << endl;
 							cout << "result ? " << result << endl;
-							//audio.music.loadSound(result);
+							audio.music.loadSound(result);
 							//audio.music.play();
 						}
 						
 					}
-			}*/
+			}
 	}
 	
+	// architecture
+	if( panel.bNewPanelSelected && panel.getSelectedPanelName() == "Architecture Drawing")
+	{
+		archPhysics.bDrawingActive = true;
+		archPhysics.pGroup.reEnableLast();
+	}
 	
+	if(panel.getSelectedPanelName() != "Architecture Drawing")
+	{
+		archPhysics.bDrawingActive = false;
+		archPhysics.pGroup.disableAll(true);
+	}
 	
+	if( panel.getValueB("arch_done") )
+	{
+		panel.setValueB("arch_done",false);
+		archPhysics.createArchitectureFromPolys();
+	}
+	
+	if( panel.getValueB("new_structure") )
+	{
+		panel.setValueB("new_structure",false);
+		archPhysics.pGroup.addPoly();
+	}
+	
+	if( panel.getValueB("arch_save") )
+	{
+		panel.setValueB("arch_save",false);
+		archPhysics.saveToXML();
+	}
+	
+	if( panel.getValueB("arch_load") )
+	{
+		panel.setValueB("arch_load",false);
+		archPhysics.loadFromXML();
+	}
+	
+	if( panel.getValueB("arch_clear") )
+	{
+		panel.setValueB("arch_clear",false);
+		archPhysics.pGroup.clear();
+		archPhysics.pGroup.addPoly();
+	}
+	
+	archPhysics.bShowArchitecture = panel.getValueB("show_drawing_tool");
+	
+	bUseAudio = panel.getValueB("use_audio");
+	bUseArchitecture = panel.getValueB("use_arch");
 }
 
 string GrafPlayerApp::getCurrentTagName()
