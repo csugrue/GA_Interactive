@@ -87,10 +87,12 @@ void GrafPlayerApp::setup(){
 	}
 	
 	// temp
-	panel.setSelectedPanel("Architecture Settings");
+	panel.setSelectedPanel("App Settings");
 	
 	// fbo
 	fbo.allocate(FBO_W,FBO_H );
+	pWarper.initWarp( FBO_W,FBO_H,FBO_W*.1,FBO_H*.1 );
+	pWarper.recalculateWarp();
 
 }
 
@@ -309,7 +311,7 @@ void GrafPlayerApp::draw(){
 	if( mode == PLAY_MODE_PLAY )
 	{
 		ofSetColor(150,150,150,255);
-		if(bUseArchitecture)
+		if( bUseArchitecture && panel.getValueB("show_image") )
 			archPhysics.drawTestImage();
 	}
 	
@@ -416,9 +418,12 @@ void GrafPlayerApp::draw(){
 			//glTranslatef(-tags[currentTagID].center.x*tags[currentTagID].drawScale,-tags[currentTagID].center.y*tags[currentTagID].drawScale,0);
 			archPhysics.draw();
 			
+			//for( int i = 0; i < wPolys.size(); i++)
+			//	wPolys[i].draw();
+				
 			if( archPhysics.bDrawingActive || panel.getValueB("show_drawing_tool") )
 			{
-				archPhysics.drawTool();
+				//archPhysics.drawTool();
 			}
 			
 		glPopMatrix();
@@ -465,18 +470,43 @@ void GrafPlayerApp::draw(){
 		bTakeScreenShot = false;
 	}
 	
+	
 	//---- end fbo render
 	fbo.end();
+	
+	if(bUseArchitecture)
+	{
+		
+		//glViewport(0,0,fbo.texData.width,fbo.texData.height);
+		
+		glPushMatrix();
+	
+		
+		if( archPhysics.bDrawingActive || panel.getValueB("show_drawing_tool") )
+		{
+			archPhysics.drawTool();
+		}
+		
+		glPopMatrix();
+	}
 	
 	
 	ofEnableAlphaBlending();
 	
 	//---- draw fbo to screen
 	ofSetColor(255,255,255,250);
-	fbo.draw(0, 0,FBO_W, FBO_H);
+	fbo.drawWarped(0, 0,FBO_W, FBO_H,pWarper.u,pWarper.v,pWarper.num_x_sections,pWarper.num_y_sections);
+	//draw(0, 0,FBO_W, FBO_H);
 	
 	// control panel
 	if(bShowPanel){
+		
+		if( panel.getSelectedPanelName() == "App Settings" )
+		{
+			pWarper.drawEditInterface(10, 10, .25);
+			pWarper.drawUV(0, 0, 1);
+		}
+		
 		panel.draw();
 		//fontSS.drawString("x: toggle control panel  |  p: pause/play  |  s: screen capture  |  m: toggle mouse  |  f: toggle fullscreen  |  h: toggle home  |  arrows: next/prev  |  esc: quit", 90, ofGetHeight()-50);
 		//fontSS.drawString("left mouse: alter position  |  left+shift mouse: zoom  |  right mouse: rotate y  |  right+shift mouse: rotate x", 220, ofGetHeight()-30);
@@ -485,6 +515,7 @@ void GrafPlayerApp::draw(){
 		{
 			audio.draw();
 		}
+		
 		
 	}
 }
@@ -512,7 +543,6 @@ void GrafPlayerApp::keyPressed (ofKeyEventArgs & event){
 		case 's': bTakeScreenShot = true; break;
 			
 		case '/': 
-			//archPhysics.setParticleBoxes( &particleDrawer.PS ); 
 			archPhysics.turnOnParticleBoxes(&particleDrawer.PS);
 			break;
 		case '?' : 	
@@ -559,21 +589,24 @@ void GrafPlayerApp::mouseDragged(ofMouseEventArgs & event ){
 		panel.mouseDragged(event.x,event.y,event.button);
 	}
 	
-	if( !panel.isMouseInPanel(event.x, event.y) && panel.getSelectedPanelName() != "Architecture Drawing" )
+	bool bMoveTag = true;
+	
+	if( panel.isMouseInPanel(event.x, event.y) )						bMoveTag = false;
+	else if( panel.getSelectedPanelName() == "Architecture Drawing")	bMoveTag = false;
+	else if( pWarper.isEditing() )										bMoveTag = false;
+	
+	if( bMoveTag )
 	{
 		if( event.button == 0 )
 		{
 			if(!bShiftOn)
 			{
-				
 				tagPosVel.x +=  tagMoveForce * (event.x-lastX);
 				tagPosVel.y +=  tagMoveForce * (event.y-lastY);
 			}else if(tags.size() > 0){
 				tags[currentTagID].position.z += .01 * (event.y-lastY);
 				tags[currentTagID].position.z = MAX(tags[currentTagID].position.z,.01);
 			}
-			
-		
 		}else{
 			if( tags.size() > 0 && !bShiftOn)		tags[currentTagID].rotation.y += (event.x-lastX);
 			else if( tags.size() > 0 && bShiftOn)	tags[currentTagID].rotation.x += (event.y-lastY);
@@ -748,7 +781,9 @@ void GrafPlayerApp::setupControlPanel()
 	panel.addSlider("Fog Start","FOG_START",fogStart,-2000,2000,true);
 	panel.addSlider("Fog End","FOG_END",fogEnd,-2000,2000,true);
 	panel.addSlider("Rotation Speed","ROT_SPEED",.65,0,4,false);
-
+	panel.addToggle("Load Warping", "load_warping", false);
+	panel.addToggle("Save Warping", "save_warping", false);
+	
 	//--- draw settings
 	panel.setWhichPanel("Draw Settings");
 	panel.addSlider("Line Alpha","LINE_ALPHA",.92,0,1,false);
@@ -789,7 +824,8 @@ void GrafPlayerApp::setupControlPanel()
 	
 	panel.setWhichPanel("Architecture Settings");
 	panel.addToggle("show drawing tool", "show_drawing_tool",false);
-	
+	panel.addToggle("show image", "show_image",true);
+
 	panel.setWhichPanel("Architecture Drawing");
 	panel.addToggle("new structure", "new_structure",false);
 	panel.addToggle("done","arch_done",false);
@@ -829,11 +865,9 @@ void GrafPlayerApp::updateControlPanel()
 	
 	drawer.setAlpha(panel.getValueF("LINE_ALPHA"));
 	drawer.lineWidth = panel.getValueF("LINE_WIDTH");
-	
 	drawer.setLineScale( panel.getValueF("LINE_SCALE") );
 	
 	particleDrawer.setParticleSize( panel.getValueF("P_SIZE") );
-	//particleDrawer.setDamping( panel.getValueF("P_DAMP") );
 	particleDrawer.particle_alpha = panel.getValueF("P_ALPHA") ;
 	particleDrawer.numXtras = panel.getValueI("P_NUM");
 	bUseGravity = panel.getValueB("USE_GRAVITY");
@@ -892,7 +926,8 @@ void GrafPlayerApp::updateControlPanel()
 	if( panel.getValueB("arch_done") )
 	{
 		panel.setValueB("arch_done",false);
-		archPhysics.createArchitectureFromPolys();
+		//archPhysics.createArchitectureFromPolys();
+		createWarpedArchitecture();
 	}
 	
 	if( panel.getValueB("new_structure") )
@@ -911,6 +946,7 @@ void GrafPlayerApp::updateControlPanel()
 	{
 		panel.setValueB("arch_load",false);
 		archPhysics.loadFromXML();
+		createWarpedArchitecture();
 	}
 	
 	if( panel.getValueB("arch_clear") )
@@ -924,6 +960,24 @@ void GrafPlayerApp::updateControlPanel()
 	
 	bUseAudio = panel.getValueB("use_audio");
 	bUseArchitecture = panel.getValueB("use_arch");
+	
+	if(panel.getSelectedPanelName() == "App Settings")
+	{
+		pWarper.enableEditing();
+	}else
+		pWarper.disableEditing();
+	
+	
+	if( panel.getValueB("load_warping") )
+	{
+		panel.setValueB("load_warping",false);
+		pWarper.loadFromXml("settings/warper.xml");
+	}
+	if( panel.getValueB("save_warping") )
+	{
+		panel.setValueB("save_warping",false);
+		pWarper.saveToXml("settings/warper.xml");
+	}
 }
 
 string GrafPlayerApp::getCurrentTagName()
@@ -933,36 +987,30 @@ string GrafPlayerApp::getCurrentTagName()
 	else return tags[currentTagID].tagname;
 }
 
-void GrafPlayerApp::drawAudioLine()
+
+void GrafPlayerApp::createWarpedArchitecture()
 {
-	if(tags.size() <= 0 ) return;
+	wPolys.clear();
 	
-	// get vector of z for each pt in tag
-	vector<float> zDepths;
-	
-	for( int i = 0; i < tags[currentTagID].myStrokes.size(); i++)
+	for( int i = 0; i < archPhysics.pGroup.polys.size(); i++)
 	{
-		for( int j = 0; j < tags[currentTagID].myStrokes[i].pts.size(); j++)
-		{
-			zDepths.push_back( tags[currentTagID ].myStrokes[i].pts[j].pos.z );
-		}
-		
+		polySimple tPoly;
+		tPoly.pts.assign( archPhysics.pGroup.polys[i]->pts.begin(),archPhysics.pGroup.polys[i]->pts.end() );
+		wPolys.push_back(tPoly);
 	}
 	
-	//cout << "tag center: " << tags[currentTagID].center.x << " " << tags[currentTagID].center.y << endl;
-	
-	glPushMatrix();
-		glTranslatef(tags[currentTagID].min.x,tags[currentTagID].min.y,tags[currentTagID].min.z);
-		glTranslatef(tags[currentTagID].center.x,tags[currentTagID].center.y,0);
-		glBegin(GL_LINE_STRIP);
-		for( int i = 0; i < zDepths.size(); i++)
+	for( int i = 0; i < wPolys.size(); i++)
+	{
+		for( int j = 0; j < wPolys[i].pts.size(); j++)
 		{
-			int ps = i % NUM_BANDS;
-			float bandH = audio.ifftOutput[ps];//audioInput[ps];
-			//glVertex3f(0,0,zDepths[i]);
-			glVertex3f(0,bandH,zDepths[i]);
+			ofPoint wPoint = pWarper.warpPoint(wPolys[i].pts[j]);
+			wPolys[i].pts[j] = wPoint;
 		}
-		glEnd();
-	glPopMatrix();
+	}
+	
+	archPhysics.createArchitectureFromPolys(wPolys);
 }
+
+
+
 

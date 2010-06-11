@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "polyFixWidth.h"
 #include "polyUtils.h"
+#include "polyEditable.h"
 
 /* NOTE: needs copy constructor?? */
 

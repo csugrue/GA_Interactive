@@ -62,6 +62,8 @@ public:
 	
 	void *getPixels();
 
+	// chris modification for warping 7.10
+	void drawWarped(int x, int y, int w, int h, float * u, float * v, int nX, int nY);
 	
 protected:
 	static bool isExtensionSupported(const char *extension);
@@ -96,4 +98,7 @@ protected:
 	static GLint maxTextureSize;
 	static GLint maxRenderBufferSize;
 	static GLint maxSamples;
+	
+	
+		
 };

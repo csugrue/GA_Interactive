@@ -494,3 +494,159 @@ void ofxFBOTexture::supportCheck(){
 	}
 }
 
+void ofxFBOTexture::drawWarped(int x, int y, int w, int h, float * u, float * v, int nX, int nY)
+{
+	
+	glEnable(texData.textureTarget);
+	
+	// bind the texture
+	glBindTexture( texData.textureTarget, (GLuint)texData.textureID );
+	
+	GLfloat px0 = 0;		// up to you to get the aspect ratio right
+	GLfloat py0 = 0;
+	GLfloat px1 = w;
+	GLfloat py1 = h;
+	
+	if (texData.bFlipTexture == true){
+		GLint temp = (GLint)py0;
+		py0 = py1;
+		py1 = temp;
+	}
+	
+	// for rect mode center, let's do this:
+	if (ofGetRectMode() == OF_RECTMODE_CENTER){
+		px0 = -w/2;
+		py0 = -h/2;
+		px1 = +w/2;
+		py1 = +h/2;
+	}
+	
+	//we translate our drawing points by our anchor point.
+	//we still respect ofRectMode so if you have rect mode set to
+	//OF_RECTMODE_CENTER your anchor will be relative to that.
+	GLfloat anchorX;
+	GLfloat anchorY;
+	
+	if(bAnchorIsPct){
+		anchorX = anchor.x * w;
+		anchorY = anchor.y * h;
+	}else{
+		anchorX = anchor.x;
+		anchorY = anchor.y;
+	}
+	
+	px0 -= anchorX;
+	py0 -= anchorY;
+	px1 -= anchorX;
+	py1 -= anchorY;
+	
+	
+	// -------------------------------------------------
+	// complete hack to remove border artifacts.
+	// slightly, slightly alters an image, scaling...
+	// to remove the border.
+	// we need a better solution for this, but
+	// to constantly add a 2 pixel border on all uploaded images
+	// is insane..
+	
+	GLfloat offsetw = 0;
+	GLfloat offseth = 0;
+	
+	/*if (texData.textureTarget == GL_TEXTURE_2D && bTexHackEnabled) {
+		offsetw = 1.0f / (texData.tex_w);
+		offseth = 1.0f / (texData.tex_h);
+	}*/
+	// -------------------------------------------------
+	
+	GLfloat tx0 = 0+offsetw;
+	GLfloat ty0 = 0+offseth;
+	GLfloat tx1 = texData.tex_t - offsetw;
+	GLfloat ty1 = texData.tex_u - offseth;
+	
+	glPushMatrix(); 
+	
+	glTranslatef(x,y,0.0f);
+	
+		// keep the x,y solid, vary the u,v
+		float x_step = (px1-px0)/nX;
+		float y_step = (py1-py0)/nY;
+	
+		float curr_y = py0;
+		float next_y = py0+y_step;
+	
+		glBegin(GL_QUADS);
+		
+		for ( int i=0; i<nY-1; i++ )
+		{
+			float curr_x = px0;
+			float next_x = px0+x_step;
+			
+			int curr_i = texData.bFlipTexture?(nY-i):i;
+			int next_i = texData.bFlipTexture?(nY-1-i):i+1;
+			
+			
+			for ( int j=0; j<nX-1; j++ )
+			{
+			
+				int p  = curr_i * nX + j;
+				int p1 = curr_i * nX + (j+1);
+				int p2 = next_i * nX + (j+1);
+				int p3 = next_i * nX + j;
+				
+				// draw this qua
+				glTexCoord2f( curr_x, h-curr_y );
+				glVertex2f( u[p], v[p] );
+				
+				glTexCoord2f( next_x, h-curr_y );
+				glVertex2f( u[p1], v[p1] );
+				
+				glTexCoord2f( next_x, h-next_y );
+				glVertex2f( u[p2], v[p2] );
+				
+				glTexCoord2f( curr_x, h-next_y );
+				glVertex2f( u[p3], v[p3] );
+				
+				
+				/*glTexCoord2f( u[p], v[p] );
+				glVertex3f( curr_x, curr_y, 0.0f );
+				glTexCoord2f( u[p1], v[p1] );
+				glVertex3f( next_x, curr_y, 0.0f );
+				glTexCoord2f( u[p2], v[p2] );
+				glVertex3f( next_x, next_y, 0.0f );
+				glTexCoord2f( u[p3], v[p3] );
+				glVertex3f( curr_x, next_y, 0.0f );*/
+			
+				curr_x = next_x;
+				next_x += x_step;
+			}
+		
+			curr_y = next_y;
+			next_y += y_step;
+		}
+		
+		glEnd();
+	
+
+	/*GLfloat tex_coords[] = {
+		tx0,ty0,
+		tx1,ty0,
+		tx1,ty1,
+		tx0,ty1
+	};
+	GLfloat verts[] = {
+		px0,py0,
+		px1,py0,
+		px1,py1,
+		px0,py1
+	};
+	
+	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	glTexCoordPointer(2, GL_FLOAT, 0, tex_coords );
+	glEnableClientState(GL_VERTEX_ARRAY);		
+	glVertexPointer(2, GL_FLOAT, 0, verts );
+	glDrawArrays( GL_TRIANGLE_FAN, 0, 4 );
+	glDisableClientState( GL_TEXTURE_COORD_ARRAY );*/
+	
+	glPopMatrix();
+	glDisable(texData.textureTarget);
+}

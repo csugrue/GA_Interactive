@@ -54,7 +54,7 @@ void GrafArchitecture::setup()
 	bMadeAll = false;
 	bPauseKill = false;
 	
-	archImage.loadImage("images/archImage.jpg");
+	archImage.loadImage("images/triomph.jpg");
 	bUseTestImage	= true;
 	
 	offSet.set(0,0);
@@ -285,22 +285,22 @@ void GrafArchitecture::drawTestImage()
 }
 
 //--------------------------------------------------------------
-void GrafArchitecture::createArchitectureFromPolys()
+void GrafArchitecture::createArchitectureFromPolys(vector<polySimple>polys)
 {
 	for( int i = 0; i < drawLines.size(); i++)
 		drawLines[i].destroyShape();
 	
 	drawLines.clear();
 	
-	for( int i = 0; i < pGroup.polys.size(); i++)
+	for( int i = 0; i < polys.size(); i++)
 	{
 		//drawLines
 		ofxBox2dLine lineStrip;
 		lineStrip.setWorld(box2d.getWorld());
 		lineStrip.clear();
-		for(int j=0; j<pGroup.polys[i]->pts.size(); j++)
+		for(int j=0; j<polys[i].pts.size(); j++)
 		{
-			lineStrip.addPoint(pGroup.polys[i]->pts[j].x, pGroup.polys[i]->pts[j].y);
+			lineStrip.addPoint(polys[i].pts[j].x, polys[i].pts[j].y);
 		}
 		lineStrip.createShape();
 		drawLines.push_back(lineStrip);
@@ -367,7 +367,7 @@ void GrafArchitecture::loadFromXML()
 	}
 	xml.popTag();
 	
-	createArchitectureFromPolys();
+	//createArchitectureFromPolys();
 }
 /*
 void GrafArchitecture::ofUniqueRandom(vector<int> * indices){

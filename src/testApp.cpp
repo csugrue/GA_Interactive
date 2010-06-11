@@ -61,7 +61,6 @@ void testApp::keyPressed(int key){
 		{
 			if(bRecordingMovie) movieSaver.finishMovie();
 			bRecordingMovie = !bRecordingMovie;
-			if(bRecordingMovie) grafAudioPlayerApp.audio.music.play();
 		}
 	}
 	

@@ -51,7 +51,7 @@ class GrafArchitecture{
 		void turnOnParticlesForLine(vector<ofPoint> pts);
 		
 		// creates box2d elements from polygons in polygroup
-		void createArchitectureFromPolys();
+		void createArchitectureFromPolys(vector<polySimple>polys);
 		vector<ofxBox2dCircle>	lineCircles;			// drawn circles
 
 		//---- the world

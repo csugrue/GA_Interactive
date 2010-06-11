@@ -8,16 +8,19 @@
 #include "grafPlayer.h"
 #include "grafCurveSmoother.h"
 #include "grafDrawer.h"
-#include "pocoDirectoryLister.h"
 #include "grafVParticleField.h"
+
+#include "pocoDirectoryLister.h"
 #include "ofxControlPanel.h"
 #include "ofxXmlSettings.h"
 #include "ofThreadedImage.h"
-#include "audioAnalyzer.h"
 #include "ofxFileDialog.h"
-#include "dropParticles.h"
 #include "ofxFBOTexture.h"
+
+#include "audioAnalyzer.h"
+#include "dropParticles.h"
 #include "grafArchitecture.h"
+#include "perspectiveWarper.h"
 
 #define TAG_DIRECTORY	"tags/"
 #define FBO_W	1280
@@ -33,15 +36,9 @@ class GrafPlayerApp{
 		~GrafPlayerApp();
 		
 		void setup();
-		
 		void update();
-		void updateParticles();
-		void updateTransition( int type);
-		void updateAudio();
-		void updateArchitecture();
-		
 		void draw();
-
+		
 		void keyPressed(ofKeyEventArgs & event);
 		void keyReleased(ofKeyEventArgs & event);
 		void mouseMoved(ofMouseEventArgs & event );
@@ -49,31 +46,45 @@ class GrafPlayerApp{
 		void mousePressed(ofMouseEventArgs & event );
 		void mouseReleased(ofMouseEventArgs & event );
 	
+	
+		//---------- audio analysis
+		AudioAnalyzer	audio;
+		
+		bool            bShiftOn;
+
+	protected:
+
+		//----- updates
+		void updateParticles();
+		void updateTransition( int type);
+		void updateAudio();
+		void updateArchitecture();
+		
+		//---- tag loading
 		void preLoadTags();
 		void loadTags();
 	
+		//---- tag playback management
 		void resetPlayer(int next);
 		void nextTag(int dir=1);
 		void clearAll();
 	
+		//--- control panel, interface etc
 		void setupControlPanel();
 		void updateControlPanel();
-		
 		string getCurrentTagName();
 	
-	
-		void drawAudioLine();
-		
-		//---------- FBO
+			
+		//---------- FBO + Warping
 		ofxFBOTexture	fbo;
+		PerspectiveWarper	pWarper;
 		
 		//---------- interactive architecture
 		GrafArchitecture		archPhysics;		// physics / architecture effects
-		
-		//---------- audio analysis
-		AudioAnalyzer	audio;
-		
-		//---------- effects
+		void createWarpedArchitecture();
+		vector<polySimple> wPolys;
+
+		//---------- audio particle effects
 		DropParticles	drops;
 		
 		//---------- loading data
@@ -109,7 +120,6 @@ class GrafPlayerApp{
 		
 			
 		//---------- application settings
-        bool            bShiftOn;
 		int             screenW,screenH;
 		float			lastX,lastY;
 		ofxThreadedImageSaver imgsaver;

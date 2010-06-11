@@ -14,6 +14,7 @@
 		832AF68E11B0241100E10D66 /* ofxFft.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 832AF68B11B0241100E10D66 /* ofxFft.cpp */; };
 		832AF6A311B0245900E10D66 /* kiss_fftr.c in Sources */ = {isa = PBXBuildFile; fileRef = 832AF69F11B0245900E10D66 /* kiss_fftr.c */; };
 		832AF6A411B0245900E10D66 /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 832AF6A111B0245900E10D66 /* kiss_fft.c */; };
+		8377A08D11C2262B002F3ABE /* perspectiveWarper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8377A08C11C2262B002F3ABE /* perspectiveWarper.cpp */; };
 		837A63C711B1480100E5E931 /* statsRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 837A63C611B1480100E5E931 /* statsRecorder.cpp */; };
 		837A63CB11B1483D00E5E931 /* ofxFileDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 837A63CA11B1483D00E5E931 /* ofxFileDialog.cpp */; };
 		837A643011B296D000E5E931 /* dropParticles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 837A642F11B296D000E5E931 /* dropParticles.cpp */; };
@@ -22,7 +23,6 @@
 		838F541F11BAD3F000505713 /* grafArchitecture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 838F541E11BAD3F000505713 /* grafArchitecture.cpp */; };
 		838F543E11BAD92A00505713 /* polyAdv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 838F543111BAD92A00505713 /* polyAdv.cpp */; };
 		838F543F11BAD92A00505713 /* polyEditable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 838F543311BAD92A00505713 /* polyEditable.cpp */; };
-		838F544011BAD92A00505713 /* polyFixWidth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 838F543511BAD92A00505713 /* polyFixWidth.cpp */; };
 		838F544111BAD92A00505713 /* polyGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 838F543711BAD92A00505713 /* polyGroup.cpp */; };
 		838F544211BAD92A00505713 /* polySimple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 838F543A11BAD92A00505713 /* polySimple.cpp */; };
 		838F544311BAD92A00505713 /* polyUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 838F543C11BAD92A00505713 /* polyUtils.cpp */; };
@@ -233,6 +233,8 @@
 		832AF6A011B0245900E10D66 /* kiss_fft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = kiss_fft.h; path = audio/ofxFft/libs/kiss/kiss_fft.h; sourceTree = "<group>"; };
 		832AF6A111B0245900E10D66 /* kiss_fft.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kiss_fft.c; path = audio/ofxFft/libs/kiss/kiss_fft.c; sourceTree = "<group>"; };
 		832AF6A211B0245900E10D66 /* _kiss_fft_guts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = _kiss_fft_guts.h; path = audio/ofxFft/libs/kiss/_kiss_fft_guts.h; sourceTree = "<group>"; };
+		8377A08B11C2262B002F3ABE /* perspectiveWarper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = perspectiveWarper.h; path = src/utils/perspectiveWarper.h; sourceTree = "<group>"; };
+		8377A08C11C2262B002F3ABE /* perspectiveWarper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = perspectiveWarper.cpp; path = src/utils/perspectiveWarper.cpp; sourceTree = "<group>"; };
 		837A63C511B1480100E5E931 /* statsRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = statsRecorder.h; path = src/utils/statsRecorder.h; sourceTree = "<group>"; };
 		837A63C611B1480100E5E931 /* statsRecorder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = statsRecorder.cpp; path = src/utils/statsRecorder.cpp; sourceTree = "<group>"; };
 		837A63C911B1483D00E5E931 /* ofxFileDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxFileDialog.h; path = src/utils/ofxFileDialog.h; sourceTree = "<group>"; };
@@ -249,8 +251,6 @@
 		838F543211BAD92A00505713 /* polyAdv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = polyAdv.h; sourceTree = "<group>"; };
 		838F543311BAD92A00505713 /* polyEditable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = polyEditable.cpp; sourceTree = "<group>"; };
 		838F543411BAD92A00505713 /* polyEditable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = polyEditable.h; sourceTree = "<group>"; };
-		838F543511BAD92A00505713 /* polyFixWidth.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = polyFixWidth.cpp; sourceTree = "<group>"; };
-		838F543611BAD92A00505713 /* polyFixWidth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = polyFixWidth.h; sourceTree = "<group>"; };
 		838F543711BAD92A00505713 /* polyGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = polyGroup.cpp; sourceTree = "<group>"; };
 		838F543811BAD92A00505713 /* polyGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = polyGroup.h; sourceTree = "<group>"; };
 		838F543911BAD92A00505713 /* polyIncludes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = polyIncludes.h; sourceTree = "<group>"; };
@@ -755,8 +755,6 @@
 				838F543211BAD92A00505713 /* polyAdv.h */,
 				838F543311BAD92A00505713 /* polyEditable.cpp */,
 				838F543411BAD92A00505713 /* polyEditable.h */,
-				838F543511BAD92A00505713 /* polyFixWidth.cpp */,
-				838F543611BAD92A00505713 /* polyFixWidth.h */,
 				838F543711BAD92A00505713 /* polyGroup.cpp */,
 				838F543811BAD92A00505713 /* polyGroup.h */,
 				838F543911BAD92A00505713 /* polyIncludes.h */,
@@ -969,8 +967,8 @@
 		83B10BE511AD550B0010F6B9 /* apps */ = {
 			isa = PBXGroup;
 			children = (
-				83B10BE811AD55250010F6B9 /* grafPlayerApp.cpp */,
 				83B10BE911AD55250010F6B9 /* grafPlayerApp.h */,
+				83B10BE811AD55250010F6B9 /* grafPlayerApp.cpp */,
 			);
 			name = apps;
 			sourceTree = "<group>";
@@ -1024,6 +1022,8 @@
 				83B10BFE11AD555B0010F6B9 /* ofThreadedImage.h */,
 				83B10BFF11AD555B0010F6B9 /* ofThreadedImage.cpp */,
 				83DDD587118ED412007567E9 /* ofxControlPanel */,
+				8377A08B11C2262B002F3ABE /* perspectiveWarper.h */,
+				8377A08C11C2262B002F3ABE /* perspectiveWarper.cpp */,
 			);
 			name = utils;
 			path = ..;
@@ -1912,7 +1912,6 @@
 				838F541F11BAD3F000505713 /* grafArchitecture.cpp in Sources */,
 				838F543E11BAD92A00505713 /* polyAdv.cpp in Sources */,
 				838F543F11BAD92A00505713 /* polyEditable.cpp in Sources */,
-				838F544011BAD92A00505713 /* polyFixWidth.cpp in Sources */,
 				838F544111BAD92A00505713 /* polyGroup.cpp in Sources */,
 				838F544211BAD92A00505713 /* polySimple.cpp in Sources */,
 				838F544311BAD92A00505713 /* polyUtils.cpp in Sources */,
@@ -1959,6 +1958,7 @@
 				838F54DA11BAD97800505713 /* b2RevoluteJoint.cpp in Sources */,
 				838F54DB11BAD97800505713 /* ofxBox2d.cpp in Sources */,
 				838F55B311BC081600505713 /* grafArchBox.cpp in Sources */,
+				8377A08D11C2262B002F3ABE /* perspectiveWarper.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
