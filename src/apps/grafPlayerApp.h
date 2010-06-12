@@ -25,6 +25,7 @@
 #define TAG_DIRECTORY	"tags/"
 #define FBO_W	1280
 #define FBO_H	800
+#define WARP_DIV	.05
 
 enum{ PLAY_MODE_LOAD, PLAY_MODE_PLAY };
 
@@ -51,7 +52,9 @@ class GrafPlayerApp{
 		AudioAnalyzer	audio;
 		
 		bool            bShiftOn;
-
+		bool			bUseAudio;
+		bool			bUseArchitecture;
+		
 	protected:
 
 		//----- updates
@@ -71,7 +74,7 @@ class GrafPlayerApp{
 	
 		//--- control panel, interface etc
 		void setupControlPanel();
-		void updateControlPanel();
+		void updateControlPanel(bool bUpdateAll = false);
 		string getCurrentTagName();
 	
 			
@@ -139,8 +142,7 @@ class GrafPlayerApp{
 		bool				bUseMask;			// toggle edge masking
 		bool				bTakeScreenShot;	
 		bool				bUseGravity;
-		bool				bUseAudio;
-		bool				bUseArchitecture;
+
 		
 		int					mode;				// current play mode PLAY_MODE_LOAD for loading, PLAY_MODE_PLAY for normal playback
 	

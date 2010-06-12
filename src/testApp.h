@@ -33,7 +33,7 @@ class testApp : public ofBaseApp{
 		void resized(int w, int h);
 		void audioReceived(float * input, int bufferSize, int nChannels);
 		
-		GrafPlayerApp	grafAudioPlayerApp;
+		GrafPlayerApp	grafInteractiveApp;
 		
 		//----- quicktime recording
 		ofxQtVideoSaver	movieSaver;

@@ -23,7 +23,7 @@ TOOL_TYPE_FREE_DRAW, TOOL_TYPE_LINE, TOOL_TYPE_RECT, TOOL_TYPE_CIRCLE, TOOL_TYPE
 };
 
 #define PS_AT_A_TIME	100
-
+#define PS_TOTAL_ALIVE	300
  
 class GrafArchitecture{
 
@@ -33,7 +33,7 @@ class GrafArchitecture{
 		
 		void reset();
 		void clear();
-		void setup();
+		void setup(int screenW = 1280, int screenH = 800);
 		void update(float dt = 1);
 		void draw();
 		void drawTool();
@@ -43,17 +43,14 @@ class GrafArchitecture{
 		void loadFromXML();
 		
 		// create boxes uot of particles from particlesystem
-		void setParticleBoxes(particleSystem * PS);
 		void createParticleSet(particleSystem * PS);
 		void turnOnParticleBoxes(particleSystem * PS);
 		
-		// create structure out of line
-		void turnOnParticlesForLine(vector<ofPoint> pts);
-		
 		// creates box2d elements from polygons in polygroup
 		void createArchitectureFromPolys(vector<polySimple>polys);
-		vector<ofxBox2dCircle>	lineCircles;			// drawn circles
 
+		void setPhysicsParams(float mass, float bounce, float friction);
+		
 		//---- the world
 		ofxBox2d						box2d;			  //	the box2d world
 		ofPoint offSet,offSetPre;
@@ -67,8 +64,8 @@ class GrafArchitecture{
 				
 		//---- box2d physics object of structure
 		vector<ofxBox2dLine>	drawLines;				// drawn lines (free or two points)
-		vector<ofxBox2dPolygon> drawPolys;				// drawn polygons
-		vector<ofxBox2dCircle>	drawCircles;			// drawn circles
+		//vector<ofxBox2dPolygon> drawPolys;				// drawn polygons
+		//vector<ofxBox2dCircle>	drawCircles;			// drawn circles
 	
 		//---- display
 		bool bShowArchitecture;
@@ -85,9 +82,13 @@ class GrafArchitecture{
 		bool			bMadeAll;
 		bool			bPauseKill;
 		
+		int screenW, screenH;
+		
+		bool			bSetup;
+		
 	protected:
 	
-		
+		float			boxBounce, boxFriction, boxMass;
 		
 
 };

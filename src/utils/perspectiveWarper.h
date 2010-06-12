@@ -68,6 +68,7 @@ class PerspectiveWarper
 		void enableEditing(){ bEditing = true; }
 		void disableEditing(){ bEditing = false; }
 		bool isEditing(){ return bEditing; }
+		int getMouseIndex(){ return mouse_index; }
 	
 	protected:
 	

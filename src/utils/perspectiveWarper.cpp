@@ -351,14 +351,28 @@ void PerspectiveWarper::reCalculateUV()
 
 void PerspectiveWarper::drawUV( float x, float y, float scale )
 {
+	glLineWidth(1);
+	
 	glPushMatrix();
 	glTranslatef(x,y,0);
-	for ( int i=0; i<num_y_sections; i++ )
+	for ( int i=0; i<num_y_sections+1; i++ )
 	{
 		for ( int j=0; j<num_x_sections; j++ )
 		{
 			int p = i * num_x_sections + j;
-			ofRect(u[p]*scale,v[p]*scale,1*scale,1*scale);
+			
+			//ofRect(u[p]*scale,v[p]*scale,1*scale,1*scale);
+			if(j < num_x_sections-1)
+			{
+				int p1 = i * num_x_sections + (j+1);
+				ofLine(u[p]*scale,v[p]*scale,u[p1]*scale,v[p1]*scale);
+			}
+			
+			if(i < num_y_sections)
+			{
+				int p1 = (i+1) * num_x_sections + j;
+				ofLine(u[p]*scale,v[p]*scale,u[p1]*scale,v[p1]*scale);
+			}
 		}
 	}
 	glPopMatrix();

@@ -360,10 +360,14 @@ void grafLineDrawer::average(float pct)
 		{
 			pts_l[i-1].x = (pctSis * pts_l[i-2].x) + (pct * pts_l[i-1].x) + (pctSis * pts_l[i].x);
 			pts_l[i-1].y = (pctSis * pts_l[i-2].y) + (pct * pts_l[i-1].y) + (pctSis * pts_l[i].y);
+			pts_lout[i-1].x = (pctSis * pts_lout[i-2].x) + (pct * pts_lout[i-1].x) + (pctSis * pts_lout[i].x);
+			pts_lout[i-1].y = (pctSis * pts_lout[i-2].y) + (pct * pts_lout[i-1].y) + (pctSis * pts_lout[i].y);
 		}else if( i== 1 )
 		{
 			pts_l[i-1].x = (pctSis * pts_l[i+1].x) + (pct * pts_l[i-1].x) + (pctSis * pts_l[i].x);
 			pts_l[i-1].y = (pctSis * pts_l[i+1].y) + (pct * pts_l[i-1].y) + (pctSis * pts_l[i].y);
+			pts_lout[i-1].x = (pctSis * pts_lout[i+1].x) + (pct * pts_lout[i-1].x) + (pctSis * pts_lout[i].x);
+			pts_lout[i-1].y = (pctSis * pts_lout[i+1].y) + (pct * pts_lout[i-1].y) + (pctSis * pts_lout[i].y);
 		}
 		
 		
@@ -371,6 +375,8 @@ void grafLineDrawer::average(float pct)
 		{
 			pts_l[i].x = (pctSis * pts_l[i-2].x) + (pctSis * pts_l[i-1].x) + (pct * pts_l[i].x);
 			pts_l[i].y = (pctSis * pts_l[i-2].y) + (pctSis * pts_l[i-1].y) + (pct * pts_l[i].y);
+			pts_lout[i].x = (pctSis * pts_lout[i-2].x) + (pctSis * pts_lout[i-1].x) + (pct * pts_lout[i].x);
+			pts_lout[i].y = (pctSis * pts_lout[i-2].y) + (pctSis * pts_lout[i-1].y) + (pct * pts_lout[i].y);
 		}
     }
 	
@@ -381,16 +387,25 @@ void grafLineDrawer::average(float pct)
 		{
 			pts_r[i-1].x = (pctSis * pts_r[i-2].x) + (pct * pts_r[i-1].x) + (pctSis * pts_r[i].x);
 			pts_r[i-1].y = (pctSis * pts_r[i-2].y) + (pct * pts_r[i-1].y) + (pctSis * pts_r[i].y);
+			
+			pts_rout[i-1].x = (pctSis * pts_rout[i-2].x) + (pct * pts_rout[i-1].x) + (pctSis * pts_rout[i].x);
+			pts_rout[i-1].y = (pctSis * pts_rout[i-2].y) + (pct * pts_rout[i-1].y) + (pctSis * pts_rout[i].y);
 		}else if( i == 1 )
 		{
 			pts_r[i-1].x = (pctSis * pts_r[i+1].x) + (pct * pts_r[i-1].x) + (pctSis * pts_r[i].x);
 			pts_r[i-1].y = (pctSis * pts_r[i+1].y) + (pct * pts_r[i-1].y) + (pctSis * pts_r[i].y);
+			
+			pts_rout[i-1].x = (pctSis * pts_rout[i+1].x) + (pct * pts_rout[i-1].x) + (pctSis * pts_rout[i].x);
+			pts_rout[i-1].y = (pctSis * pts_rout[i+1].y) + (pct * pts_rout[i-1].y) + (pctSis * pts_rout[i].y);
 		}
 		
 		if( i == pts_r.size()-1 )
 		{
 			pts_r[i].x = (pctSis * pts_r[i-2].x) + (pctSis * pts_r[i-1].x) + (pct * pts_r[i].x);
 			pts_r[i].y = (pctSis * pts_r[i-2].y) + (pctSis * pts_r[i-1].y) + (pct * pts_r[i].y);
+			
+			pts_rout[i].x = (pctSis * pts_rout[i-2].x) + (pctSis * pts_rout[i-1].x) + (pct * pts_rout[i].x);
+			pts_rout[i].y = (pctSis * pts_rout[i-2].y) + (pctSis * pts_rout[i-1].y) + (pct * pts_rout[i].y);
 		}
     }
 	
@@ -401,6 +416,12 @@ void grafLineDrawer::average(float pct)
 		
 		pts_l[i].x = (.99 * pts_l[i].x) + (.01 * pts_r[i].x);
 		pts_l[i].y = (.99 * pts_l[i].y) + (.01 * pts_r[i].y);
+		
+		pts_rout[i].x = (.99 * pts_rout[i].x) + (.01 * pts_lout[i].x);
+		pts_rout[i].y = (.99 * pts_rout[i].y) + (.01 * pts_lout[i].y);
+		
+		pts_lout[i].x = (.99 * pts_lout[i].x) + (.01 * pts_rout[i].x);
+		pts_lout[i].y = (.99 * pts_lout[i].y) + (.01 * pts_rout[i].y);
 	}
 	
 }

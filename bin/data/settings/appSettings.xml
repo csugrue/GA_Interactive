@@ -2,10 +2,10 @@
     <val_0>1.000000</val_0>
 </PLAY>
 <ROTATE>
-    <val_0>0.000000</val_0>
+    <val_0>1.000000</val_0>
 </ROTATE>
 <SHOW_NAME>
-    <val_0>1.000000</val_0>
+    <val_0>0.000000</val_0>
 </SHOW_NAME>
 <SHOW_TIME>
     <val_0>0.000000</val_0>
@@ -20,7 +20,7 @@
     <val_0>2.000000</val_0>
 </LINE_WIDTH>
 <P_SIZE>
-    <val_0>4.055555</val_0>
+    <val_0>6.722222</val_0>
 </P_SIZE>
 <P_ALPHA>
     <val_0>0.838889</val_0>
@@ -118,3 +118,33 @@
 <arch_clear>
     <val_0>0.000000</val_0>
 </arch_clear>
+<load_warping>
+    <val_0>0.000000</val_0>
+</load_warping>
+<save_warping>
+    <val_0>0.000000</val_0>
+</save_warping>
+<show_image>
+    <val_0>1.000000</val_0>
+</show_image>
+<box_mass>
+    <val_0>1.000000</val_0>
+</box_mass>
+<box_bounce>
+    <val_0>0.530000</val_0>
+</box_bounce>
+<box_friction>
+    <val_0>0.410000</val_0>
+</box_friction>
+<use_audio>
+    <val_0>1.000000</val_0>
+</use_audio>
+<use_arch>
+    <val_0>1.000000</val_0>
+</use_arch>
+<gravity>
+    <val_0>6.000000</val_0>
+</gravity>
+<reset_warping>
+    <val_0>0.000000</val_0>
+</reset_warping>

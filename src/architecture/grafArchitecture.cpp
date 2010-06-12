@@ -11,6 +11,7 @@
 
 GrafArchitecture::GrafArchitecture()
 {
+bSetup = false;
 }
 
 GrafArchitecture::~GrafArchitecture()
@@ -36,15 +37,18 @@ void GrafArchitecture::reset()
 }
 
 
-void GrafArchitecture::setup()
+void GrafArchitecture::setup(int sW, int sH)
 {
+	screenW = sW;
+	screenH = sH;
+	
 	box2d.init();
-	box2d.setGravity(0, 10);
-	box2d.createFloor();
+	box2d.setGravity(0, 6);
+	//box2d.createFloor();
 	box2d.checkBounds(true);
 	box2d.setFPS(30.0);
 	
-	bDrawingActive	= true;
+	bDrawingActive	= false;
 	toolType		= TOOL_TYPE_POLY;
 	pGroup.setup();
 	pGroup.setStrokeColor(255, 0, 255, 255);
@@ -62,7 +66,11 @@ void GrafArchitecture::setup()
 	scale = 1;
 	// load save architecture
 	
+	boxBounce	= .53;
+	boxFriction = .31;
+	boxMass		= 1;
 	
+	bSetup = true;
 }
 
 void GrafArchitecture::turnOnParticleBoxes(particleSystem * PS)
@@ -95,8 +103,7 @@ void GrafArchitecture::turnOnParticleBoxes(particleSystem * PS)
 
 void GrafArchitecture::createParticleSet(particleSystem * PS)
 {
-	float screenW = 1024;//ofGetWidth();
-	float screenH = 768;//ofGetHeight();
+
 	
 	int countThisSet = 0;
 	int numThisTime = ofRandom(PS_AT_A_TIME*.25,PS_AT_A_TIME);
@@ -111,11 +118,11 @@ void GrafArchitecture::createParticleSet(particleSystem * PS)
 		// if off add to total off
 		if(PS->col[me][3] == 0 ) PS->bDrawOn[me] = false;
 		
-		if( PS->bDrawOn[me] && countThisSet < numThisTime && boxes.size() < 300)
+		if( PS->bDrawOn[me] && countThisSet < numThisTime && boxes.size() < PS_TOTAL_ALIVE)
 		{
 			float size = PS->sizes[me];
 			GrafArchBox rect;
-			rect.setPhysics(0.4, 0.53, 10.31);
+			rect.setPhysics(boxMass, boxBounce, boxFriction);
 			rect.setup(box2d.getWorld(), (screenW/2)+offSetPre.x+( scale*PS->pos[me][0]+scale*offSet.x), (screenH/2)+offSetPre.y+(scale*PS->pos[me][1]+scale*offSet.y), scale*size, scale*size);
 			rect.setAlpha(PS->col[me][3]);
 			rect.setRandomLifespan(2,10);
@@ -140,79 +147,6 @@ void GrafArchitecture::createParticleSet(particleSystem * PS)
 	
 	
 	
-	
-}
-
-void GrafArchitecture::setParticleBoxes(particleSystem * PS)
-{
-	float screenW = ofGetWidth();
-	float screenH = ofGetHeight();
-	
-	for(int i=0; i<boxes.size(); i++)
-		boxes[i].destroyShape();
-	
-	boxes.clear();
-	
-	int tOn  = 0;
-	
-	/*
-	for( int i = PS->numParticles-1; i >= 0; i-=2)
-	{
-		
-		if(  PS->framesOn[i] > 0 && boxes.size() < 500)
-		{
-		float size = PS->sizes[i];
-		GrafArchBox rect;
-		rect.setPhysics(3.0, 0.53, 0.1);
-		rect.setup(box2d.getWorld(), (screenW/2)+offSetPre.x+( scale*PS->pos[i][0]+scale*offSet.x), (screenH/2)+offSetPre.y+(scale*PS->pos[i][1]+scale*offSet.y), scale*size, scale*size);
-		rect.setAlpha(PS->col[i][3]);
-		boxes.push_back(rect);
-		
-		PS->bDrawOn[i] = false;
-		PS->col[i][3] = 0;
-		
-		}else if( PS->framesOn[i] > 0 )
-			tOn++;
-	}*/
-	
-	//for( int i = PS->numParticles-1; i >= 0; i--) 
-	//	
-	//cout << "boxes: " << boxes.size() << "tota/lOn " << tOn << endl;
-}
-
-void GrafArchitecture::turnOnParticlesForLine(vector<ofPoint> pts)
-{
-	float screenW = ofGetWidth();
-	float screenH = ofGetHeight();
-	
-	for(int i=0; i<lineCircles.size(); i++)
-		lineCircles[i].destroyShape();
-	
-	lineCircles.clear();
-	
-	//return;
-	
-	/*for( int i = 0; i < lineCircles.size(); i++)
-	{
-		*/
-	
-	//if(lineCircles.size() > 0) lineCircles.clear();
-	
-	//for( int i = 0; i < lines.size(); i++)
-	//{
-		int total = MIN(30,pts.size() );
-		
-		for( int j = 0; j < total; j++)
-		{
-			float x = (screenW/2)+offSetPre.x+(scale*(pts[j].x*768)+scale*offSet.x);
-			float y = (screenH/2)+offSetPre.y+(scale*(pts[j].y*768)+scale*offSet.y);
-			ofxBox2dCircle circle;
-			circle.setPhysics(3.0, 0.53, 0.1);
-			circle.setup(box2d.getWorld(), x, y, 2);//,4);
-			lineCircles.push_back(circle);
-			//circle.destroyShape();//			
-		}
-	//}
 	
 }
 
@@ -252,12 +186,6 @@ void GrafArchitecture::draw()
 		boxes[i].draw();
 	}
 	
-	for(int i=0; i<lineCircles.size(); i++)
-	{
-		lineCircles[i].draw();
-	}
-	
-	
 	if(bShowArchitecture)
 	{
 		for(int i=0; i<drawLines.size(); i++)
@@ -280,7 +208,7 @@ void GrafArchitecture::drawTool()
 
 void GrafArchitecture::drawTestImage()
 {
-	float scaleImage = (float)ofGetWidth() /  (float)archImage.width;
+	float scaleImage = (float)ofGetHeight() /  (float)archImage.height;
 	archImage.draw(0,0,scaleImage*archImage.width,scaleImage*archImage.height);
 }
 
@@ -303,7 +231,13 @@ void GrafArchitecture::createArchitectureFromPolys(vector<polySimple>polys)
 			lineStrip.addPoint(polys[i].pts[j].x, polys[i].pts[j].y);
 		}
 		lineStrip.createShape();
+		//lineStrip.setPhysics(0, 0, 1);
+
 		drawLines.push_back(lineStrip);
+		drawLines[i].setPhysics(0, 0, .2);
+		drawLines[i].edgeDef.density = 0.0f;
+		drawLines[i].edgeDef.restitution = 0.0f;
+		cout << "line friction " << drawLines[i].friction << endl;
 	}
 	
 }
@@ -367,24 +301,19 @@ void GrafArchitecture::loadFromXML()
 	}
 	xml.popTag();
 	
-	//createArchitectureFromPolys();
 }
-/*
-void GrafArchitecture::ofUniqueRandom(vector<int> * indices){
+
+
+void GrafArchitecture::setPhysicsParams(float mass, float bounce, float friction)
+{
+	boxBounce = bounce;
+	boxMass = mass;
+	boxFriction = friction;
 	
-	vector<int> world;
-	int magnitude = indices.size()-1;
-	
- 	for(int i=0;i<indices.size();i++){
-		world[i] = i;
-		keys[i] = 0;
+	for( int i = 0; i < boxes.size(); i++)
+	{
+	boxes[i].setPhysics(boxMass,boxBounce,boxFriction);
 	}
+}
+
 	
-	for(int i=0;i<dim;i++){
-		int pos = int(ofRandom(0,magnitude));
-		keys[i] = world[pos];
-		world[pos] = world[magnitude];
-		magnitude--;
-	}
-	return keys;
-}*/

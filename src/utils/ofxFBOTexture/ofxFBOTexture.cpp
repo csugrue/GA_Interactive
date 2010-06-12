@@ -576,7 +576,7 @@ void ofxFBOTexture::drawWarped(int x, int y, int w, int h, float * u, float * v,
 	
 		glBegin(GL_QUADS);
 		
-		for ( int i=0; i<nY-1; i++ )
+		for ( int i=0; i<nY; i++ )
 		{
 			float curr_x = px0;
 			float next_x = px0+x_step;

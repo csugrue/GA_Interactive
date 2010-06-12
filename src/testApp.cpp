@@ -10,7 +10,7 @@ void testApp::setup(){
 	
 	ofSoundStreamSetup(0,1,this, 44100, NUM_BANDS, 4);	
 
-	grafAudioPlayerApp.setup();
+	grafInteractiveApp.setup();
 	
 	
 	// for video recording
@@ -28,13 +28,13 @@ void testApp::update(){
 
 	ofSoundUpdate();	
 
-	grafAudioPlayerApp.update();	
+	grafInteractiveApp.update();	
 }
 
 //--------------------------------------------------------------
 void testApp::draw(){
 
-	grafAudioPlayerApp.draw();
+	grafInteractiveApp.draw();
 	
 	if(bRecordingMovie)
 	{
@@ -101,8 +101,8 @@ void testApp::mouseDragged(int x, int y, int button){
 void testApp::mousePressed(int x, int y, int button){
 
 	int modifier = glutGetModifiers();
-	if( modifier == GLUT_ACTIVE_SHIFT) grafAudioPlayerApp.bShiftOn = true;
-	else grafAudioPlayerApp.bShiftOn = false;
+	if( modifier == GLUT_ACTIVE_SHIFT) grafInteractiveApp.bShiftOn = true;
+	else grafInteractiveApp.bShiftOn = false;
 
 }
 
@@ -114,9 +114,9 @@ void testApp::mouseReleased(int x, int y, int button){
 //--------------------------------------------------------------
 void testApp::audioReceived(float * input, int bufferSize, int nChannels){	
 	// samples are "interleaved"
-	if(grafAudioPlayerApp.audio.bSetup)
+	if(grafInteractiveApp.audio.bSetup && grafInteractiveApp.bUseAudio)
 	{
-	memcpy(grafAudioPlayerApp.audio.audioInput, input, sizeof(float) * (NUM_BANDS));
-		grafAudioPlayerApp.audio.bufferCounter++;
+	memcpy(grafInteractiveApp.audio.audioInput, input, sizeof(float) * (NUM_BANDS));
+		grafInteractiveApp.audio.bufferCounter++;
 	}
 }
