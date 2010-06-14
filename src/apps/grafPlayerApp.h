@@ -23,9 +23,7 @@
 #include "perspectiveWarper.h"
 
 #define TAG_DIRECTORY	"tags/"
-#define FBO_W	1280
-#define FBO_H	800
-#define WARP_DIV	.05
+#define WARP_DIV	.125
 
 enum{ PLAY_MODE_LOAD, PLAY_MODE_PLAY };
 
@@ -47,7 +45,8 @@ class GrafPlayerApp{
 		void mousePressed(ofMouseEventArgs & event );
 		void mouseReleased(ofMouseEventArgs & event );
 	
-	
+		void loadScreenSettings();
+		
 		//---------- audio analysis
 		AudioAnalyzer	audio;
 		
@@ -66,6 +65,7 @@ class GrafPlayerApp{
 		//---- tag loading
 		void preLoadTags();
 		void loadTags();
+		void saveTagPositions();
 	
 		//---- tag playback management
 		void resetPlayer(int next);
@@ -79,7 +79,7 @@ class GrafPlayerApp{
 	
 			
 		//---------- FBO + Warping
-		ofxFBOTexture	fbo;
+		ofxFBOTexture		fbo;
 		PerspectiveWarper	pWarper;
 		
 		//---------- interactive architecture
@@ -99,35 +99,35 @@ class GrafPlayerApp{
 		vector<string>			filenames;				// list of corresponding file names (sans .gml)
 	
 		//---------- gml tags
-		vector<grafTagMulti> tags;						
-		int currentTagID;							// id of the current tag being played 
+		vector<grafTagMulti> tags;						// vector of all loaded tags
+		int currentTagID;								// id of the current tag being played 
 
 		//---------- player to animate the tag 
-		grafPlayer	myTagPlayer;					
+		grafPlayer	myTagPlayer;						// manages playback of tag in time
 		
 		//---------- smooths curve for nice drawing
-		grafCurveSmoother smoother;
+		grafCurveSmoother smoother;						// adds points to smooth tag
 	
 		//---------- drawing
-		grafDrawer			drawer;					// draws thick time stroked line
-		grafVParticleField	particleDrawer;			// draws and animates particles
-		float				rotationY;				// y rotation for current tag
-		ofPoint				tagPosVel;				// vel for moving tag around on screen
-		float				tagMoveForce;			// force for moving tag around
-		ofTrueTypeFont		fontS;					// fonts for drawing info to screen
+		grafDrawer			drawer;						// draws thick time stroked line
+		grafVParticleField	particleDrawer;				// draws and animates particles
+		float				rotationY;					// y rotation for current tag
+		ofPoint				tagPosVel;					// vel for moving tag around on screen
+		float				tagMoveForce;				// force for moving tag around
+		int					prevStroke;					// for multi stroke tags, to help particle animation
+		float				fogStart,fogEnd;			// fog settings
+		float				rotFixTime;					// timer for making rotation move to particular position in a fixed time frame
+		ofTrueTypeFont		fontS;						// fonts for drawing info to screen
 		ofTrueTypeFont		fontL;
 		ofTrueTypeFont		fontSS;
-		int					prevStroke;				// for multi stroke tags, to help particle animation
-		float				fogStart,fogEnd;		// fog settings
-		float				rotFixTime;				// timer for making rotation move to particular position in a fixed time frame
-		
+	
 			
 		//---------- application settings
-		int             screenW,screenH;
-		float			lastX,lastY;
-		ofxThreadedImageSaver imgsaver;
-		ofImage				imageMask;
-		float					dt;
+		int						screenW,screenH;	
+		float					lastX,lastY;
+		ofxThreadedImageSaver	imgsaver;
+		ofImage					imageMask;
+		float					dt;					// difference time
 		float					waitTimer;			// counter to pause after animation finished
 		float					waitTime;			// time to pause
 	
@@ -146,12 +146,121 @@ class GrafPlayerApp{
 		
 		int					mode;				// current play mode PLAY_MODE_LOAD for loading, PLAY_MODE_PLAY for normal playback
 	
-		// files opening
+		// files opening for audio
 		ofxFileDialog dialog;
 		vector <string> resultString;
 	
-	
+		// path to files
+		string pathToSettings;
 	
 };
+
+
+/*---------------------- Guide to controls
+
+App Settings (1)
+---------------------------
+Use Audio			- toggle audio effects on/off
+Use Architecture	- toggle interactive architecture effects on/off
+Play / Pause		- toggle play of animation of tag and rotation (other effects continue)
+Fullscreen			- toggle fullscreen
+Rotate				- toggle continuous rotation on y-axis
+Rotation Speed		- adjusts speed of above rotation
+Display filename	- toggle display of name from gml file
+Display time		- toggle display of playback time
+Save Tag Position/Rotation - saves any changes to position and rotaiton of tag to the current tag gml. Does not alter point data at alll
+
+Draw Settings (2)
+---------------------------
+Line Alpha			- alpha value of thick line
+Outline Width		- stroke weight of outline
+LineScale			- adjust thickness of line
+Particle Size		- adjust size of particles (note: changes with audio effects)
+Particle Damping	- adjust speed of particles
+Number Particles	- adjust number of particle sets used (?disabled)
+Use gravity			- toggle gravity effect for transition (does not apply with audio/arch effects)
+Use edge mask		- fades out edges of projection area
+Use  fog			- toggle fog effects
+
+Audio Settings (3)
+---------------------------
+Outward amp force	- adjust forces that push particles outward from their resting position
+Particle size force	- adjust forces that change the size of particles w/audio
+Wave deform force	- adjust forces that deform the line w/fft vals
+Bounce force		- adjust forces that make tag bounce with levels
+Change wait time	- adjust time to wait before changing to next tag
+Drop p threshold	- adjust threshold of amount above average levels that creates a big particle that falls
+
+(other toggles turn these effects on/off)
+
+Architecture Drawing (4)
+---------------------------
+In this part architectural elements can be sketched by mouse click. 
+When finished you must hit "done" to make them physics objects.
+
+left - click : add a new point (also selects closest drawing if > 1 )
+right - drag : move all points (might be a bug that only works > 2 points)
+left - shift click/drag: select and drag any point individually
+TAB : select next point on drawn structure
+RETURN: start new drawing/structure
+DELETE: remove last point
+
+new strucutre	- start new drawing/structure
+done			- converts drawings to objects that can interact with particles
+save			- saves drawing to xml file
+load			- loads last saved drawings
+clear			- clears everything
+
+ Architecture Settings (5)
+ ---------------------------
+ show architecture		- toggle drawn architecture elements ( only those converted to physics objects)
+ show image				- toggle test image on/off
+ mass					- adjust mass of particles
+ bounce					- adjust bounce forces of particles
+ friction				- adjust friction forces of particles
+ gravity				- adjust world gravity
+ 
+ FBO Warper (6)
+ ---------------------------
+ Load Warping			- loads saved warper
+ Save Warping			- saves current warper setup
+ Reset Warping			- resets to screen width/height
+ Toggle Preview			- toggles pic-in-pic style interface
+ 
+ 
+ Other controls:
+ 
+ (note that these apply when not in architecture drawing panel)
+ x: toggle control panel
+ p: pause/play animation
+ s: save screenshot
+ m: toggle cursor
+ f: toggle fullscreen
+ R: resets tag to default position/rotation
+ arrows (r/l) : advance to next or previous tag
+ 
+ left-mouse: position tag
+ right-mouse: rotate tag
+ left-shift mouse: zoom tag
+ 
+ F3: setup for recording video
+ F4: toggle video recording
+ 
+ (video saved in data>output>video)
+ 
+Projects:
+---------------------------
+all data, tags and settings are loaded from the current "user" folder that can be changed in 
+bin > data > projects > user.xml
+
+default is "default" :)
+
+to make a new project, copy and paste default folder, rename it, and change name to match in user.xml
+
+
+Screen dimensions can be changed in screenSettings.xml, found in settings of current project folder
+data > projects > default > settings > screenSettings.xml
+ 
+-------------------------*/
 
 #endif

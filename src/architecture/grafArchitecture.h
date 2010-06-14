@@ -39,8 +39,8 @@ class GrafArchitecture{
 		void drawTool();
 		void drawTestImage();
 		
-		void saveToXML();
-		void loadFromXML();
+		void saveToXML(string filename);
+		void loadFromXML(string filename);
 		
 		// create boxes uot of particles from particlesystem
 		void createParticleSet(particleSystem * PS);

@@ -126,12 +126,12 @@ void polyGroup::draw()
 		{
 			ofRectangle rect = polys[i]->getBoundingBox();
 			ofNoFill();
-			ofSetColor(100,100,100,200);
+			ofSetColor(100,100,100,255);
 			ofRect( rect.x-4,rect.y-4,rect.width+8, rect.height+8);
 		}
 		
 		if(i == selectedId ) ofSetColor(strokeColor.r,strokeColor.g,strokeColor.b,strokeColor.a);
-		else ofSetColor(strokeColor.r,strokeColor.g,strokeColor.b,strokeColor.a*.5);
+		else ofSetColor(strokeColor.r,strokeColor.g,strokeColor.b,strokeColor.a*.75);
 		
 		polys[i]->draw(polys[i]->bClosed);
 		

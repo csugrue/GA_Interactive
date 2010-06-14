@@ -14,11 +14,14 @@ void testApp::setup(){
 	
 	
 	// for video recording
-	movieSaver.setup(640,480, "GA_Audio.mov" );
+	movieSaver.setup(640,480, "output/video/GA.mov" );
 	movieSaver.setCodecType( OF_QT_SAVER_CODEC_QUALITY_NORMAL );
 	
 	bRecordingMovie	= false;
 	bUseRecorder	= false;
+	
+	bShowMouse = true;
+
 }
 
 
@@ -36,9 +39,16 @@ void testApp::draw(){
 
 	grafInteractiveApp.draw();
 	
+	if(bUseRecorder)
+	{
+		int x = ofGetWidth()/2 - 320;
+		int y = ofGetHeight()/2 - 240;
+		ofNoFill();
+		ofRect(x-1,y-1,642, 482);
+	}
+	
 	if(bRecordingMovie)
 	{
-		//cout << "rec" << endl;
 		int x = ofGetWidth()/2 - 320;
 		int y = ofGetHeight()/2 - 240;
 		ofImage img;
@@ -47,9 +57,11 @@ void testApp::draw(){
 		
 		ofFill();
 		ofSetColor(255, 0, 0);
-		ofRect(641, 481, 4, 4);
-		ofSetColor(255, 255, 255);
+		ofRect(x+641, y+481, 4, 4);
+		ofSetColor(255, 255, 255);		
 	}
+	
+	
 }
 
 //--------------------------------------------------------------
@@ -67,17 +79,17 @@ void testApp::keyPressed(int key){
 	else if( key == OF_KEY_F3 )
 	{
 		bUseRecorder = !bUseRecorder;
-		if(bUseRecorder)
-		{
-			ofSetWindowShape(645, 485);
-		}else{
-			ofSetWindowShape(1024, 768);
-		}
 		
 		
 	}else if( key == 'f' || key == 'F' )
 		ofToggleFullscreen();
+	else if( key == 'm')
+	{
+		bShowMouse = !bShowMouse;
+		if(!bShowMouse) ofHideCursor();
+		else ofShowCursor();
 		
+	}	
 	
 }
 

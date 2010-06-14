@@ -568,8 +568,8 @@ void ofxFBOTexture::drawWarped(int x, int y, int w, int h, float * u, float * v,
 	glTranslatef(x,y,0.0f);
 	
 		// keep the x,y solid, vary the u,v
-		float x_step = (px1-px0)/nX;
-		float y_step = (py1-py0)/nY;
+		float x_step = (px1-px0)/(float)nX;
+		float y_step = (py1-py0)/(float)nY;
 	
 		float curr_y = py0;
 		float next_y = py0+y_step;
@@ -585,13 +585,13 @@ void ofxFBOTexture::drawWarped(int x, int y, int w, int h, float * u, float * v,
 			int next_i = texData.bFlipTexture?(nY-1-i):i+1;
 			
 			
-			for ( int j=0; j<nX-1; j++ )
+			for ( int j=0; j<nX; j++ )
 			{
 			
-				int p  = curr_i * nX + j;
-				int p1 = curr_i * nX + (j+1);
-				int p2 = next_i * nX + (j+1);
-				int p3 = next_i * nX + j;
+				int p  = curr_i * (nX+1) + j;
+				int p1 = curr_i * (nX+1) + (j+1);
+				int p2 = next_i * (nX+1) + (j+1);
+				int p3 = next_i * (nX+1) + j;
 				
 				// draw this qua
 				glTexCoord2f( curr_x, h-curr_y );

@@ -20,6 +20,14 @@ GrafPlayerApp::~GrafPlayerApp(){
 //--------------------------------------------------------------
 void GrafPlayerApp::setup(){
 
+	
+	ofxXmlSettings xmlUser;
+	xmlUser.loadFile("projects/user.xml");
+	string username = xmlUser.getValue("params:user","default");
+	
+	pathToSettings = "projects/"+username+"/settings/";//"settings/default/";
+	myTagDirectory = "projects/"+username+"/tags/";
+	
 	ofAddListener(ofEvents.mouseMoved, this, &GrafPlayerApp::mouseMoved);
 	ofAddListener(ofEvents.mousePressed, this, &GrafPlayerApp::mousePressed);
 	ofAddListener(ofEvents.mouseReleased, this, &GrafPlayerApp::mouseReleased);
@@ -27,9 +35,11 @@ void GrafPlayerApp::setup(){
 	ofAddListener(ofEvents.keyPressed, this, &GrafPlayerApp::keyPressed);
 	ofAddListener(ofEvents.keyReleased, this, &GrafPlayerApp::keyReleased);
 
+	screenW			= 1024;
+	screenH			= 768;
+	loadScreenSettings();
+	
 	mode			= PLAY_MODE_LOAD;
-	screenW			= FBO_W;
-	screenH			= FBO_H;
 	lastX			= 0;
 	lastY			= 0;
 	bShowPanel		= true;
@@ -50,7 +60,7 @@ void GrafPlayerApp::setup(){
 	rotationY		= -45;
 	tagMoveForce	= .1;
 	tagPosVel.set(0,0,0);
-	myTagDirectory = TAG_DIRECTORY;
+	//myTagDirectory = TAG_DIRECTORY;
 	
 	fontSS.loadFont("fonts/frabk.ttf",9);
 	fontS.loadFont("fonts/frabk.ttf",14);
@@ -64,9 +74,9 @@ void GrafPlayerApp::setup(){
 	fogStart = 370;
     fogEnd   = 970;
 	
-	ofxXmlSettings xml;
-	xml.loadFile("data/settings/directorySettings");
-	myTagDirectory = xml.getValue("directory", TAG_DIRECTORY);
+	//ofxXmlSettings xml;
+	//xml.loadFile(pathToSettings+"directorySettings");
+	//myTagDirectory = xml.getValue("directory", TAG_DIRECTORY);
 	
 	// controls
 	setupControlPanel();
@@ -76,15 +86,13 @@ void GrafPlayerApp::setup(){
 	preLoadTags();
 	particleDrawer.setup(screenW,screenH);
 	
-	
-
 	// fbo
-	fbo.allocate(FBO_W,FBO_H );
-	pWarper.initWarp( FBO_W,FBO_H,FBO_W*WARP_DIV,FBO_H*WARP_DIV );
+	fbo.allocate(screenW,screenH );
+	pWarper.initWarp( screenW,screenH,screenW*WARP_DIV,screenH*WARP_DIV );
 	pWarper.recalculateWarp();
 	
 	
-	pWarper.loadFromXml("settings/warper.xml");
+	pWarper.loadFromXml(pathToSettings+"warper.xml");
 	
 	// audio
 	if(bUseAudio) audio.setup();
@@ -93,13 +101,14 @@ void GrafPlayerApp::setup(){
 	if(bUseArchitecture)
 	{
 		archPhysics.setup(screenW,screenH);
-		archPhysics.loadFromXML();
+		archPhysics.archImage.loadImage(pathToSettings+"arch.jpg");
+		archPhysics.loadFromXML(pathToSettings+"architecture.xml");
 		createWarpedArchitecture();
 	}
 	
 	
 	// temp
-	panel.setSelectedPanel("FBO Warper");
+	//panel.setSelectedPanel("FBO Warper");
 	
 }
 
@@ -203,11 +212,11 @@ void GrafPlayerApp::updateTransition( int type)
 	{
 	
 		float deform_frc = panel.getValueF("wave_deform_force");
-		float line_amp_frc = panel.getValueF("line_width_force");
+		//float line_amp_frc = panel.getValueF("line_width_force");
 		float bounce_frc = panel.getValueF("bounce_force");
 		
 		if( panel.getValueB("use_wave_deform") ) drawer.transitionDeform( dt,deform_frc, audio.audioInput, NUM_BANDS);
-		if( panel.getValueB("use_line_width") ) drawer.transitionLineWidth( dt,audio.averageVal*line_amp_frc);
+		//if( panel.getValueB("use_line_width") ) drawer.transitionLineWidth( dt,audio.averageVal*line_amp_frc);
 		if( panel.getValueB("use_bounce") ) drawer.transitionBounce( dt,audio.averageVal*bounce_frc);
 		if( drawer.pctTransLine < .1 ) drawer.pctTransLine += .001;
 		
@@ -239,8 +248,8 @@ void GrafPlayerApp::updateTransition( int type)
 			if(archPhysics.bMadeAll)
 			{
 				// do average transition
-				//drawer.transition(dt,.99);
-				drawer.alpha -= .1*dt;
+				drawer.transition(dt,.15);
+				drawer.alpha -= .35*dt;
 				if(particleDrawer.alpha  > 0 ) particleDrawer.alpha -= .5*dt;
 			}
 			
@@ -253,8 +262,9 @@ void GrafPlayerApp::updateTransition( int type)
 		// do average transition
 		//drawer.transition(dt,.99);
 		
-		drawer.alpha -= .1*dt;
-		if(!bUseAudio) drawer.transition(dt,.15);
+		drawer.alpha -= .35*dt;
+		//if(!bUseAudio) 
+		drawer.transition(dt,.15);
 		if( bUseGravity ) particleDrawer.fall(dt);
 		if(particleDrawer.alpha  > 0 ) particleDrawer.alpha -= .5*dt;
 		
@@ -274,19 +284,23 @@ void GrafPlayerApp::updateAudio()
 		particleDrawer.updateParticleAmpli(audio.ifftOutput,audio.averageVal, NUM_BANDS,panel.getValueF("outward_amp_force") );
 	
 	// create drops
-	for( int i = 0; i < audio.peakFades.size(); i++)
+	if( panel.getValueB("use_drop") )
 	{
-		if( audio.peakFades[i] == 1 )
+		
+		for( int i = 0; i < audio.peakFades.size(); i++)
 		{
-			int randomP = particleDrawer.PS.getIndexOfRandomAliveParticle();//ofRandom( 0, particleDrawer.PS.numParticles );
-			ofPoint pPos = ofPoint(particleDrawer.PS.pos[randomP][0],particleDrawer.PS.pos[randomP][1],particleDrawer.PS.pos[randomP][2]);
-			ofPoint pVel = ofPoint(particleDrawer.PS.vel[randomP][0],particleDrawer.PS.vel[randomP][1],particleDrawer.PS.vel[randomP][2]);
-			drops.createRandomDrop( pPos, pVel, particleDrawer.PS.sizes[randomP] );
+			if( audio.peakFades[i] == 1 )
+			{
+				int randomP = particleDrawer.PS.getIndexOfRandomAliveParticle();//ofRandom( 0, particleDrawer.PS.numParticles );
+				ofPoint pPos = ofPoint(particleDrawer.PS.pos[randomP][0],particleDrawer.PS.pos[randomP][1],particleDrawer.PS.pos[randomP][2]);
+				ofPoint pVel = ofPoint(particleDrawer.PS.vel[randomP][0],particleDrawer.PS.vel[randomP][1],particleDrawer.PS.vel[randomP][2]);
+				drops.createRandomDrop( pPos, pVel, particleDrawer.PS.sizes[randomP] );
+			}
 		}
+		
+		// update particle drops (audio stuff);
+		drops.update(dt);
 	}
-	
-	// update particle drops (audio stuff);
-	drops.update(dt);
 	
 	// update audio
 	audio.update();
@@ -308,8 +322,6 @@ void GrafPlayerApp::updateArchitecture()
 //--------------------------------------------------------------
 void GrafPlayerApp::draw(){
 
-	screenW = FBO_W;//ofGetWidth();
-	screenH = FBO_H;//ofGetHeight();
 	
 	// architecture test image
 	if( mode == PLAY_MODE_PLAY )
@@ -367,7 +379,7 @@ void GrafPlayerApp::draw(){
 				particleDrawer.draw(myTagPlayer.getCurrentPoint().z,  screenW,  screenH);
 								
 				// draw audio particles
-				if( bUseAudio) drops.draw();
+				if( bUseAudio && panel.getValueB("use_drop") ) drops.draw();
 				
 				glEnable(GL_DEPTH_TEST);
 				
@@ -415,7 +427,7 @@ void GrafPlayerApp::draw(){
 	{
 		ofEnableAlphaBlending();
 		glBlendFunc(GL_DST_COLOR, GL_ZERO);
-		imageMask.draw(0,0,FBO_W,FBO_H);
+		imageMask.draw(0,0,screenW,screenH);
 	}
 	
 	// data
@@ -460,7 +472,7 @@ void GrafPlayerApp::draw(){
 	
 	
 	//---- draw fbo to screen
-	fbo.drawWarped(0, 0,FBO_W, FBO_H,pWarper.u,pWarper.v,pWarper.num_x_sections,pWarper.num_y_sections);
+	fbo.drawWarped(0, 0,screenW, screenH,pWarper.u,pWarper.v,pWarper.num_x_sections,pWarper.num_y_sections);
 	
 	
 	// -- arch drawing tool
@@ -476,7 +488,10 @@ void GrafPlayerApp::draw(){
 		
 		if( panel.getSelectedPanelName() == "FBO Warper" )
 		{
-			pWarper.drawEditInterface(10, 10, .25);
+			if( panel.getValueB("toggle_fbo_preview") )
+				pWarper.drawEditInterface(10, 10,.25);
+			else 
+				pWarper.drawEditInterface(0, 0, 1);
 			
 			ofSetColor(255,255,255,100);
 			pWarper.drawUV(0, 0, 1);
@@ -484,15 +499,21 @@ void GrafPlayerApp::draw(){
 		
 		panel.draw();
 		ofSetColor(255,255,255,200);
-		fontSS.drawString("x: toggle control panel  |  p: pause/play  |  s: screen capture  |  m: toggle mouse  |  f: toggle fullscreen  |  h: toggle home  |  arrows: next/prev  |  esc: quit", 90, ofGetHeight()-50);
-		fontSS.drawString("left mouse: alter position  |  left+shift mouse: zoom  |  right mouse: rotate y  |  right+shift mouse: rotate x", 220, ofGetHeight()-30);
+		if( panel.getSelectedPanelName() != "Architecture Drawing" )
+		{
+			fontSS.drawString("x: toggle control panel  |  p: pause/play  |  s: screen capture  |  m: toggle mouse  |  f: toggle fullscreen  |  R: reset pos/rot  |  arrows: next/prev  |  esc: quit", 90, ofGetHeight()-50);
+			fontSS.drawString("left mouse: alter position  |  left+shift mouse: zoom  |  right mouse: rotate y  |  right+shift mouse: rotate x", 220, ofGetHeight()-30);
+		}else{
+			fontSS.drawString("left-mouse: add point  |  right-mouse: move / select all  |  left+shift mouse: move single point  |  Return: new shape  | Delete: remove last point", 90, ofGetHeight()-50);
+
+		}
+		
 		
 		if( bUseAudio && panel.getSelectedPanelName() == "Audio Settings" )
 			audio.draw();
 		
 	}
 }
-
 
 //--------------------------------------------------------------
 void GrafPlayerApp::keyPressed (ofKeyEventArgs & event){
@@ -515,9 +536,6 @@ void GrafPlayerApp::keyPressed (ofKeyEventArgs & event){
 		
 		case 's': bTakeScreenShot = true; break;
 			
-		case '/': 
-			archPhysics.turnOnParticleBoxes(&particleDrawer.PS);
-			break;
 		case 'R':
 			tags[currentTagID].rotation.set(0,0,0);
 			tags[currentTagID].position.set(0,0,1);
@@ -691,6 +709,8 @@ void GrafPlayerApp::preLoadTags()
 	filenames.clear();
 	totalToLoad = 0;
 	
+	cout << "PATH TO TAGS: " << ofToDataPath(myTagDirectory,true) << endl;
+	
 	vector<string> dirs;
 	dirLister.setPath( ofToDataPath(myTagDirectory,true) );
 	dirLister.findSubDirectories(dirs);
@@ -727,11 +747,28 @@ void GrafPlayerApp::preLoadTags()
 	
 	totalToLoad = filesToLoad.size();
 }
+
+//--------------------------------------------------------------
+void GrafPlayerApp::saveTagPositions()
+{
+	if(currentTagID < 0) return;
+	
+	ofxXmlSettings xml;
+	xml.loadFile(filesToLoad[currentTagID] );
+	xml.setValue("GML:tag:environment:offset:x", tags[currentTagID].position.x );
+	xml.setValue("GML:tag:environment:offset:y", tags[currentTagID].position.y );
+	xml.setValue("GML:tag:environment:offset:z", tags[currentTagID].position.z );
+	xml.setValue("GML:tag:environment:rotation:x", tags[currentTagID].rotation.x );
+	xml.setValue("GML:tag:environment:rotation:y", tags[currentTagID].rotation.y );
+	xml.setValue("GML:tag:environment:rotation:z", tags[currentTagID].rotation.z );
+	xml.saveFile(filesToLoad[currentTagID] );
+}
+
 //--------------------------------------------------------------
 void GrafPlayerApp::setupControlPanel()
 {
 	
-	panel.setup("GA 2.0: Audio", ofGetWidth()-320, 20, 300, 700);
+	panel.setup("GA 3.0", ofGetWidth()-320, 20, 300, 600);
 	panel.addPanel("App Settings", 1, false);
 	panel.addPanel("Draw Settings", 1, false);
 	panel.addPanel("Audio Settings", 1, false);
@@ -741,18 +778,16 @@ void GrafPlayerApp::setupControlPanel()
 
 	//---- application sttings
 	panel.setWhichPanel("App Settings");
+	panel.addToggle("Use Audio", "use_audio",true);
+	panel.addToggle("Use Architecture", "use_arch",true);
 	panel.addToggle("Play / Pause", "PLAY", true);
+	panel.addToggle("FullScreen", "FULL_SCREEN", false);
 	panel.addToggle("Rotate", "ROTATE", true);
+	panel.addSlider("Rotation Speed","ROT_SPEED",.65,0,4,false);
 	panel.addToggle("Display filename", "SHOW_NAME", true);
 	panel.addToggle("Display time", "SHOW_TIME", true);
-	panel.addToggle("FullScreen", "FULL_SCREEN", false);
-	panel.addToggle("Use Fog", "USE_FOG", false);
-	panel.addSlider("Fog Start","FOG_START",fogStart,-2000,2000,true);
-	panel.addSlider("Fog End","FOG_END",fogEnd,-2000,2000,true);
-	panel.addSlider("Rotation Speed","ROT_SPEED",.65,0,4,false);
-	panel.addToggle("use audio", "use_audio",true);
-	panel.addToggle("use architecture", "use_arch",true);
-	
+	panel.addToggle("Save Tag Position/Rotation", "save_Tag_pos", false);
+
 	//--- draw settings
 	panel.setWhichPanel("Draw Settings");
 	panel.addSlider("Line Alpha","LINE_ALPHA",.92,0,1,false);
@@ -765,32 +800,33 @@ void GrafPlayerApp::setupControlPanel()
 	panel.addToggle("Use gravity", "USE_GRAVITY", true);
 	panel.addToggle("Use edge mask", "USE_MASK", false);
 	
+	panel.addToggle("Use Fog", "USE_FOG", false);
+	panel.addSlider("Fog Start","FOG_START",fogStart,-2000,2000,true);
+	panel.addSlider("Fog End","FOG_END",fogEnd,-2000,2000,true);
+	
+	
 	//--- audio settings
 	panel.setWhichPanel("Audio Settings");
-	/*vector<string> names_audio_options;
-	names_audio_options.push_back("line in");
-	names_audio_options.push_back("music file");
-	panel.addMultiToggle("audio input:", "audio_input", 1, names_audio_options);
-	*/
-	panel.addToggle("open sound file", "open_sound_file", false);
-	panel.addSlider("outward amp force","outward_amp_force",8,0,200,false);
-	panel.addSlider("particle size force","particle_size_force",22,0,200,false);
-	panel.addSlider("wave deform force","wave_deform_force",.25,0,2,false);
-	panel.addSlider("line width force","line_width_force",.25,0,2,false);
-	panel.addSlider("bounce force","bounce_force",.25,0,2,false);
-	panel.addSlider("change wait time","wait_time",30,0,120,true);
-	panel.addSlider("drop p threshold","drop_p_thresh",.1,0,2,false);
+	panel.addToggle("Open sound file", "open_sound_file", false);
+	panel.addSlider("Outward amp force","outward_amp_force",8,0,200,false);
+	panel.addSlider("Particle size force","particle_size_force",22,0,200,false);
+	panel.addSlider("Wave deform force","wave_deform_force",.25,0,2,false);
+	//panel.addSlider("line width force","line_width_force",.25,0,2,false);
+	panel.addSlider("Bounce force","bounce_force",.25,0,2,false);
+	panel.addSlider("Change wait time","wait_time",30,0,120,true);
+	panel.addSlider("Drop p threshold","drop_p_thresh",.1,0,2,false);
 	
 	//panel.addSlider("particle speed force","p_audio_damp",1,0,4,false);
 
 	// toggles to apply what to what...
-	panel.addToggle("use particle amp", "use_p_amp", true);
-	panel.addToggle("use particle size", "use_p_size", true);
+	panel.addToggle("Use particle amp", "use_p_amp", true);
+	panel.addToggle("Use particle size", "use_p_size", true);
 	//panel.addToggle("use particle speed", "use_p_damp", false);
-	panel.addToggle("use wave deform", "use_wave_deform", true);
-	panel.addToggle("use line width amp", "use_line_width", false);
-	panel.addToggle("use bounce", "use_bounce", true);
-	
+	panel.addToggle("Use wave deform", "use_wave_deform", true);
+	//panel.addToggle("Use line width amp", "use_line_width", false);
+	panel.addToggle("Use bounce", "use_bounce", true);
+	panel.addToggle("Use drop particel", "use_drop", true);
+
 	panel.setWhichPanel("Architecture Settings");
 	panel.addToggle("show drawing tool", "show_drawing_tool",false);
 	panel.addToggle("show image", "show_image",true);
@@ -810,41 +846,42 @@ void GrafPlayerApp::setupControlPanel()
 	panel.addToggle("Load Warping", "load_warping", true);
 	panel.addToggle("Save Warping", "save_warping", false);
 	panel.addToggle("Reset Warping", "reset_warping", false);
+	panel.addToggle("Toggle Preview","toggle_fbo_preview",false);
 	
 	//--- load saved
-	panel.loadSettings("settings/appSettings.xml");
+	panel.loadSettings(pathToSettings+"appSettings.xml");
 	
 	updateControlPanel(true);
 	//panel.update();
 }
-
 //--------------------------------------------------------------
 void GrafPlayerApp::updateControlPanel(bool bUpdateAll)
 {
 	
 	panel.update();
 	
-	if(!bUpdateAll && !panel.isMouseInPanel(lastX, lastY) ) return;
+	//if(!bUpdateAll && !panel.isMouseInPanel(lastX, lastY) ) return;
 	
 	if( panel.getSelectedPanelName() == "App Settings" || bUpdateAll)
 	{
 		
 		myTagPlayer.bPaused = !panel.getValueB("PLAY");
-		bRotating = panel.getValueB("ROTATE");
-		bShowName = panel.getValueB("SHOW_NAME");
-		bShowTime = panel.getValueB("SHOW_TIME");
-	
 		if( panel.getValueB("FULL_SCREEN") )
 		{
 			panel.setValueB("FULL_SCREEN",false);
 			ofToggleFullscreen();
 		}
-	
-		bUseFog = panel.getValueB("USE_FOG");
-		fogStart = panel.getValueI("FOG_START");
-		fogEnd = panel.getValueI("FOG_END");
+		bRotating = panel.getValueB("ROTATE");
+		bShowName = panel.getValueB("SHOW_NAME");
+		bShowTime = panel.getValueB("SHOW_TIME");
 		
-	
+		if( panel.getValueB("save_Tag_pos") )
+		{
+			panel.setValueB("save_Tag_pos",false);
+			saveTagPositions();
+		}
+
+
 	}
 	
 	if( panel.getSelectedPanelName() == "Draw Settings" || bUpdateAll)
@@ -859,7 +896,13 @@ void GrafPlayerApp::updateControlPanel(bool bUpdateAll)
 		particleDrawer.numXtras = panel.getValueI("P_NUM");
 		bUseGravity = panel.getValueB("USE_GRAVITY");
 		bUseMask = panel.getValueB("USE_MASK");
-	
+		
+		
+		bUseFog = panel.getValueB("USE_FOG");
+		fogStart = panel.getValueI("FOG_START");
+		fogEnd = panel.getValueI("FOG_END");
+		
+		
 	}
 	
 	if(panel.getSelectedPanelName() == "Audio Settings" )
@@ -910,13 +953,13 @@ void GrafPlayerApp::updateControlPanel(bool bUpdateAll)
 		if( panel.getValueB("arch_save") )
 		{
 			panel.setValueB("arch_save",false);
-			archPhysics.saveToXML();
+			archPhysics.saveToXML(pathToSettings+"architecture.xml");
 		}
 		
 		if( panel.getValueB("arch_load") )
 		{
 			panel.setValueB("arch_load",false);
-			archPhysics.loadFromXML();
+			archPhysics.loadFromXML(pathToSettings+"architecture.xml");
 			createWarpedArchitecture();
 		}
 		
@@ -931,9 +974,12 @@ void GrafPlayerApp::updateControlPanel(bool bUpdateAll)
 	if( panel.getSelectedPanelName() == "Architecture Settings" )
 	{
 		archPhysics.bShowArchitecture = panel.getValueB("show_drawing_tool");
-		archPhysics.setPhysicsParams( panel.getValueF("box_mass"), panel.getValueF("box_bounce"), panel.getValueF("box_friction"));
-		archPhysics.box2d.setGravity(0,panel.getValueI("gravity") );
-	
+		
+		if( panel.isMouseInPanel(lastX, lastY) )
+		{
+			archPhysics.setPhysicsParams( panel.getValueF("box_mass"), panel.getValueF("box_bounce"), panel.getValueF("box_friction"));
+			archPhysics.box2d.setGravity(0,panel.getValueI("gravity") );
+		}
 	}
 	
 	if( panel.getSelectedPanelName() == "FBO Warper")
@@ -943,21 +989,24 @@ void GrafPlayerApp::updateControlPanel(bool bUpdateAll)
 		if( panel.getValueB("load_warping") )
 		{
 			panel.setValueB("load_warping",false);
-			pWarper.loadFromXml("settings/warper.xml");
+			pWarper.loadFromXml(pathToSettings+"warper.xml");
 		}
 		
 		if( panel.getValueB("save_warping") )
 		{
 			panel.setValueB("save_warping",false);
-			pWarper.saveToXml("settings/warper.xml");
+			pWarper.saveToXml(pathToSettings+"warper.xml");
 		}
 		
 		if( panel.getValueB("reset_warping") )
 		{
 			panel.setValueB("reset_warping",false);
-			pWarper.initWarp( FBO_W,FBO_H,FBO_W*WARP_DIV,FBO_H*WARP_DIV );
+			pWarper.initWarp( screenW,screenH,screenW*WARP_DIV,screenH*WARP_DIV );
 			pWarper.recalculateWarp();
 		}
+		
+		
+		
 	}
 	
 
@@ -1013,6 +1062,16 @@ void GrafPlayerApp::createWarpedArchitecture()
 	archPhysics.createArchitectureFromPolys(wPolys);
 }
 
+
+void GrafPlayerApp::loadScreenSettings()
+{
+	ofxXmlSettings xml;
+	xml.loadFile(pathToSettings+"screenSettings.xml");
+	xml.pushTag("screen");
+		screenW = xml.getValue("width",1024);
+		screenH = xml.getValue("height",768);
+	xml.popTag();
+}
 
 
 

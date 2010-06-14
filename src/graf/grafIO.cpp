@@ -63,6 +63,14 @@ void grafIO::loadTag(string gmlFile, grafTagMulti * tag)
 		up.y = xml.getValue("up:y", -1);
 		up.z = xml.getValue("up:z", 0);
 		
+		tag->position.x = xml.getValue("offset:x", 0);
+		tag->position.y = xml.getValue("offset:y", 0);
+		tag->position.z = xml.getValue("offset:z", 1);
+		
+		tag->rotation.x = xml.getValue("rotation:x", 0);
+		tag->rotation.y = xml.getValue("rotation:y", 0);
+		tag->rotation.z = xml.getValue("rotation:z", 0);
+		
 		xml.popTag();
 	}
 	

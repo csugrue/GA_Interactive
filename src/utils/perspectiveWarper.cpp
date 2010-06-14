@@ -194,7 +194,6 @@ void PerspectiveWarper::drawEditInterface( float x, float y, float scale )
 }
 
 
-
 void PerspectiveWarper::mouseMoved(ofMouseEventArgs& event)
 {
 	if ( !bEditing ) return;
@@ -319,8 +318,8 @@ void PerspectiveWarper::reCalculateUV()
 	}
 	
 	
-	GLfloat x_step = (px1-px0)/num_x_sections;
-	GLfloat y_step = (py1-py0)/num_y_sections;
+	GLfloat x_step = (px1-px0)/(float)num_x_sections;
+	GLfloat y_step = (py1-py0)/(float)num_y_sections;
 	
 	GLfloat curr_y = py0;
 	
@@ -333,7 +332,7 @@ void PerspectiveWarper::reCalculateUV()
 			// warp
 			ofPoint warped = warpPointInv( ofPoint( curr_x, curr_y ) );
 			
-			int p = i * num_x_sections + j;
+			int p = i * (num_x_sections+1) + j;
 			
 			// store
 			u[p] = warped.x;
@@ -357,20 +356,20 @@ void PerspectiveWarper::drawUV( float x, float y, float scale )
 	glTranslatef(x,y,0);
 	for ( int i=0; i<num_y_sections+1; i++ )
 	{
-		for ( int j=0; j<num_x_sections; j++ )
+		for ( int j=0; j<num_x_sections+1; j++ )
 		{
-			int p = i * num_x_sections + j;
+			int p = i * (num_x_sections+1) + j;
 			
 			//ofRect(u[p]*scale,v[p]*scale,1*scale,1*scale);
-			if(j < num_x_sections-1)
+			if(j < num_x_sections)
 			{
-				int p1 = i * num_x_sections + (j+1);
+				int p1 = i * (num_x_sections+1) + (j+1);
 				ofLine(u[p]*scale,v[p]*scale,u[p1]*scale,v[p1]*scale);
 			}
 			
 			if(i < num_y_sections)
 			{
-				int p1 = (i+1) * num_x_sections + j;
+				int p1 = (i+1) * (num_x_sections+1) + j;
 				ofLine(u[p]*scale,v[p]*scale,u[p1]*scale,v[p1]*scale);
 			}
 		}

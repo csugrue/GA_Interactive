@@ -401,7 +401,7 @@
 		83DDD5A1118ED437007567E9 /* grafTagMulti.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = grafTagMulti.cpp; path = src/graf/grafTagMulti.cpp; sourceTree = "<group>"; };
 		83DDD5A3118ED461007567E9 /* grafIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = grafIO.cpp; path = src/graf/grafIO.cpp; sourceTree = "<group>"; };
 		83DDD5A4118ED461007567E9 /* grafIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = grafIO.h; path = src/graf/grafIO.h; sourceTree = "<group>"; };
-		83DDDD1E1191772F007567E9 /* GA_Model.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GA_Model.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		83DDDD1E1191772F007567E9 /* GA_3.0.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GA_3.0.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		83DDDEE41192D5CE007567E9 /* grafCurveSmoother.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = grafCurveSmoother.h; path = src/graf/grafCurveSmoother.h; sourceTree = "<group>"; };
 		83DDDEE51192D5CE007567E9 /* grafCurveSmoother.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = grafCurveSmoother.cpp; path = src/graf/grafCurveSmoother.cpp; sourceTree = "<group>"; };
 		E44665D70F5B3E03005D0BF0 /* model3DS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = model3DS.cpp; path = ../../../addons/ofx3DModelLoader/src/3DS/model3DS.cpp; sourceTree = SOURCE_ROOT; };
@@ -732,20 +732,12 @@
 		838F541811BABA8900505713 /* architecture */ = {
 			isa = PBXGroup;
 			children = (
-				838F541A11BABA9B00505713 /* archInteractive */,
-			);
-			name = architecture;
-			sourceTree = "<group>";
-		};
-		838F541A11BABA9B00505713 /* archInteractive */ = {
-			isa = PBXGroup;
-			children = (
 				838F541D11BAD3F000505713 /* grafArchitecture.h */,
 				838F541E11BAD3F000505713 /* grafArchitecture.cpp */,
 				838F55B111BC081600505713 /* grafArchBox.h */,
 				838F55B211BC081600505713 /* grafArchBox.cpp */,
 			);
-			name = archInteractive;
+			name = architecture;
 			sourceTree = "<group>";
 		};
 		838F543011BAD92A00505713 /* polygonTools */ = {
@@ -1682,7 +1674,7 @@
 				E4C2422310CC54B6004149E2 /* openFrameworks */,
 				E44665C70F5B3E03005D0BF0 /* addons */,
 				E45BE0360E8CC5DE009D7055 /* libs */,
-				83DDDD1E1191772F007567E9 /* GA_Model.app */,
+				83DDDD1E1191772F007567E9 /* GA_3.0.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1796,7 +1788,7 @@
 			);
 			name = GA_Interactive;
 			productName = myOFApp;
-			productReference = 83DDDD1E1191772F007567E9 /* GA_Model.app */;
+			productReference = 83DDDD1E1191772F007567E9 /* GA_3.0.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -2065,7 +2057,7 @@
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_8 = "\"$(SRCROOT)/../../../addons/ofxOsc/libs/oscpack/lib/osx\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_9 = "\"$(SRCROOT)/../../../libs/FreeImage/lib/osx\"";
 				PREBINDING = NO;
-				PRODUCT_NAME = GA_Model;
+				PRODUCT_NAME = GA_3.0;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -2197,7 +2189,7 @@
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_8 = "\"$(SRCROOT)/../../../addons/ofxOsc/libs/oscpack/lib/osx\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_9 = "\"$(SRCROOT)/../../../libs/FreeImage/lib/osx\"";
 				PREBINDING = NO;
-				PRODUCT_NAME = GA_Model;
+				PRODUCT_NAME = GA_3.0;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -2255,7 +2247,7 @@
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_8 = "\"$(SRCROOT)/../../../addons/ofxOsc/libs/oscpack/lib/osx\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_9 = "\"$(SRCROOT)/../../../libs/FreeImage/lib/osx\"";
 				PREBINDING = NO;
-				PRODUCT_NAME = GA_Model;
+				PRODUCT_NAME = GA_3.0;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};

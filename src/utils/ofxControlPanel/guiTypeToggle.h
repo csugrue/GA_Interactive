@@ -14,6 +14,7 @@ class guiTypeToggle : public guiBaseObject{
         void setup(string toggleName, bool defaultVal){
             value.addValue( (int)defaultVal, 0, 1);
             name = toggleName;
+			bShowText = false;
         }
 
         //-----------------------------------------------.
@@ -53,6 +54,9 @@ class guiTypeToggle : public guiBaseObject{
 
                     glColor4fv(fgColor.getColorF());
                     ofRect(hitArea.x+3, hitArea.y+3, -6 + hitArea.width, -6 + hitArea.height);
+					
+					glColor4fv(textColor.getColorF());
+					displayText.renderString(name, hitArea.x + 6 + hitArea.width,hitArea.y + hitArea.height -2);
 
                 glPopMatrix();
             ofPopStyle();

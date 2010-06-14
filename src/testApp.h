@@ -34,6 +34,7 @@ class testApp : public ofBaseApp{
 		void audioReceived(float * input, int bufferSize, int nChannels);
 		
 		GrafPlayerApp	grafInteractiveApp;
+		bool bShowMouse;
 		
 		//----- quicktime recording
 		ofxQtVideoSaver	movieSaver;

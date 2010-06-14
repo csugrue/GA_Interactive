@@ -51,14 +51,14 @@ void GrafArchitecture::setup(int sW, int sH)
 	bDrawingActive	= false;
 	toolType		= TOOL_TYPE_POLY;
 	pGroup.setup();
-	pGroup.setStrokeColor(255, 0, 255, 255);
+	pGroup.setStrokeColor(255, 255, 255, 255);
 	
 	bShowArchitecture = false;
 	bMakingParticles = false;
 	bMadeAll = false;
 	bPauseKill = false;
 	
-	archImage.loadImage("images/triomph.jpg");
+	
 	bUseTestImage	= true;
 	
 	offSet.set(0,0);
@@ -201,7 +201,7 @@ void GrafArchitecture::drawTool()
 {
 	
 	ofNoFill();
-	ofSetColor(255,0,255,255);
+	ofSetColor(255,255,255,255);
 	pGroup.draw();
 	
 }
@@ -242,7 +242,7 @@ void GrafArchitecture::createArchitectureFromPolys(vector<polySimple>polys)
 	
 }
 
-void GrafArchitecture::saveToXML()
+void GrafArchitecture::saveToXML(string filename)
 {
 	ofxXmlSettings xml;
 	
@@ -264,13 +264,13 @@ void GrafArchitecture::saveToXML()
 		}
 	xml.popTag();
 	
-	xml.saveFile("settings/architecture.xml");
+	xml.saveFile(filename);//"settings/architecture.xml");
 }
 
-void GrafArchitecture::loadFromXML()
+void GrafArchitecture::loadFromXML(string filename)
 {
 	ofxXmlSettings xml;
-	xml.loadFile("settings/architecture.xml");
+	xml.loadFile(filename);//"settings/architecture.xml");
 	
 	xml.pushTag("grafArchitecture");
 	
